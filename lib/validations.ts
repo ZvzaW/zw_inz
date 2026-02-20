@@ -37,7 +37,7 @@ export const traineeSchema = z.object({
     .string()
     .trim()
     .min(1, "Numer telefonu jest wymagany")
-    .regex(/^[0-9\s+()-]{9,20}$/, "Podaj poprawny numer telefonu"),
+    .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu"),
   birthdate: z
     .string()
     .min(1, "Data urodzenia jest wymagana")
@@ -66,7 +66,7 @@ export const trainerSchema = z.object({
     .string()
     .trim()
     .min(1, "Numer telefonu jest wymagany")
-    .regex(/^[0-9\s+()-]{9,20}$/, "Podaj poprawny numer telefonu"),
+    .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu"),
   password: passwordSchema,
   workplaceName: z.string().trim().min(1, "Nazwa miejsca jest wymagana"),
   street: z.string().trim().min(1, "Ulica jest wymagana"),

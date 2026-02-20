@@ -177,7 +177,6 @@ export default function RegisterPage() {
                     <Input
                       id="trainee-phone"
                       type="tel"
-                      placeholder="000000000"
                       aria-invalid={!!traineeForm.formState.errors.phone}
                       {...traineeForm.register("phone")}
                     />
@@ -339,7 +338,6 @@ export default function RegisterPage() {
                   <Input
                     id="trainer-phone"
                     type="tel"
-                    placeholder="000000000"
                     aria-invalid={!!trainerForm.formState.errors.phone}
                     {...trainerForm.register("phone")}
                   />
