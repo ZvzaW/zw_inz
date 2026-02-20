@@ -1,3 +1,7 @@
+"use client"
+
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,6 +21,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 
 export default function RegisterPage() {
+  const [showPasswordTrainee, setShowPasswordTrainee] = useState(false)
+  const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
+
+
+  //PAGE
   return (
     <div className="flex min-h-screen items-center justify-center p-10">
       <Card className="w-full max-w-lg">
@@ -39,13 +48,13 @@ export default function RegisterPage() {
               <form className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="firstName">Imię *</Label>
-                    <Input id="firstName" placeholder="Anna"/>
+                    <Label htmlFor="name">Imię *</Label>
+                    <Input id="name" placeholder="Anna"/>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="lastName">Nazwisko *</Label>
-                    <Input id="lastName" placeholder="Kowalska" />
+                    <Label htmlFor="surname">Nazwisko *</Label>
+                    <Input id="surname" placeholder="Kowalska" />
                   </div>
                 </div>
                 
@@ -61,15 +70,32 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="birthDate">Data urodzenia *</Label>
-                    <Input id="birthDate" type="date"/>
+                    <Label htmlFor="birthdate">Data urodzenia *</Label>
+                    <Input id="birthdate" type="date"/>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="password">Hasło *</Label>
-                  <Input id="password" type="password" />
-                  <p className="text-xs text-zinc-400">Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                  <div className="relative">
+                    <Input 
+                      id="password" 
+                      type={showPasswordTrainee ? "text" : "password"} 
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordTrainee(!showPasswordTrainee)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                    >
+                      {showPasswordTrainee ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-300">Min. 8 znaków: małe i wielkie litery, cyfry</p>
                 </div>
 
                 <div className="flex items-center space-x-2 pt-2">
@@ -88,29 +114,46 @@ export default function RegisterPage() {
               <form className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="t-firstName">Imię *</Label>
-                    <Input id="t-firstName" placeholder="Anna" />
+                    <Label htmlFor="name">Imię *</Label>
+                    <Input id="name" placeholder="Anna" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="t-lastName">Nazwisko *</Label>
-                    <Input id="t-lastName" placeholder="Kowalska" />
+                    <Label htmlFor="surname">Nazwisko *</Label>
+                    <Input id="surname" placeholder="Kowalska" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="t-email">Adres e-mail *</Label>
-                  <Input id="t-email" type="email" placeholder="anna@example.com" />
+                  <Label htmlFor="email">Adres e-mail *</Label>
+                  <Input id="email" type="email" placeholder="anna@example.com" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="t-phone">Numer telefonu *</Label>
-                  <Input id="t-phone" type="tel" placeholder="+48 000 000 000" />
+                  <Label htmlFor="phone">Numer telefonu *</Label>
+                  <Input id="phone" type="tel" placeholder="000 000 000" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="t-password">Hasło *</Label>
-                  <Input id="t-password" type="password" />
-                  <p className="text-xs text-zinc-400">Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                  <Label htmlFor="password-trainer">Hasło *</Label>
+                  <div className="relative">
+                    <Input 
+                      id="password-trainer" 
+                      type={showPasswordTrainer ? "text" : "password"} 
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordTrainer(!showPasswordTrainer)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                    >
+                      {showPasswordTrainer ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-300">Min. 8 znaków: małe i wielkie litery, cyfry</p>
                 </div>
 
                 {/* WORKPLACE SECTION */}
@@ -120,31 +163,31 @@ export default function RegisterPage() {
                   </Label>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="t-workplace-name">Nazwa miejsca *</Label>
+                    <Label htmlFor="workplace-name">Nazwa miejsca *</Label>
                     <Input
-                      id="t-workplace-name"
+                      id="workplace-name"
                       className="border-gold"
                       placeholder="np. Siłownia X"
                     />
                   </div>
                   
                   <div className="space-y-1">
-                      <Label htmlFor="t-street" >
+                      <Label htmlFor="street" >
                         Ulica *
                       </Label>
                       <Input
-                        id="t-street"
+                        id="street"
                         className="border-gold"
                       />
                   </div>
                   
                   <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
                     <div className="space-y-1">
-                      <Label htmlFor="t-building-number" >
+                      <Label htmlFor="building-number" >
                         Nr bud. *
                       </Label>
                       <Input
-                        id="t-building-number"
+                        id="building-number"
                         className="border-gold"
                       />
                     </div>
@@ -152,26 +195,26 @@ export default function RegisterPage() {
                       /
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="t-apartment-number" >
+                      <Label htmlFor="flatnumber" >
                         Nr mieszk.
                       </Label>
                       <Input
-                        id="t-apartment-number"
+                        id="flat-number"
                         className="border-gold"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor="t-city">Miasto *</Label>
-                    <Input id="t-city" className="border-gold" />
+                    <Label htmlFor="city">Miasto *</Label>
+                    <Input id="city" className="border-gold" />
                   </div>
                   <p className="text-xs text-zinc-300 ">Kolejne miejsca pracy możesz dodać po zalogowaniu do systemu.</p>
                 </div>
 
                 <div className="flex items-center space-x-2 pt-2">
-                  <Checkbox id="terms-trainer" />
-                  <Label htmlFor="terms-trainer" className="text-sm font-normal">
+                  <Checkbox id="terms" />
+                  <Label htmlFor="terms" className="text-sm font-normal">
                     Wyrażam zgodę na przetwarzanie danych. *
                   </Label>
                 </div>
