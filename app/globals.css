@@ -47,7 +47,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  --color-gold: #D0BC8C;
+  --color-gold: #F0DAA7;
   --color-baby-blue: #8CA0D0;
 }
 
@@ -85,7 +85,7 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
   
   --radius: 1rem; 
-  --gold: #D0BC8C; 
+  --gold: #F0DAA7; 
   --baby-blue: #8CA0D0;
 }
 
