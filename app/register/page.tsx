@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -77,12 +78,12 @@ export default function RegisterPage() {
   }
 
   const onSubmitTrainee = (data: TraineeFormValues) => {
-    // TODO: obsługa rejestracji podopiecznego
+    // TODO: implement registration handling for trainee
     console.log("Trainee register", data)
   }
 
   const onSubmitTrainer = (data: TrainerFormValues) => {
-    // TODO: obsługa rejestracji trenera
+    // TODO: implement registration handling for trainer
     console.log("Trainer register", data)
   }
 
@@ -224,11 +225,7 @@ export default function RegisterPage() {
                       }
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainee ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPasswordTrainee ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                   <p className="text-xs text-zinc-300">
@@ -366,11 +363,7 @@ export default function RegisterPage() {
                       }
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainer ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPasswordTrainer ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                   <p className="text-xs text-zinc-300">
@@ -509,12 +502,19 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full " type="submit">
+                <Button className="w-full" type="submit">
                   Utwórz konto trenera
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="text-center text-sm text-zinc-400 pt-6">
+              Masz już konto?{" "}
+              <Link href="/" className="text-baby-blue hover:underline">
+                Zaloguj się
+              </Link>
+            </div>
         </CardContent>
       </Card>
     </div>
