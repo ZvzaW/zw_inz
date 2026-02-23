@@ -35,7 +35,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/*EMAIL*/}
             <div className="space-y-1.5">
-              <Label htmlFor="email">Adres e-mail *</Label>
+              <Label htmlFor="email">Adres e-mail</Label>
               <Input
                 id="email"
                 type="email"
@@ -46,7 +46,7 @@ export default function LoginPage() {
 
             {/*PASSWORD*/}
             <div className="space-y-1.5">
-              <Label htmlFor="password">Hasło *</Label>
+              <Label htmlFor="password">Hasło</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -63,10 +63,10 @@ export default function LoginPage() {
               </div>
               
               {/*PASSWORD RESET*/}
-              <div className="flex justify-center pt-1">
+              <div className="flex justify-start pt-1 pl-1">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-baby-blue hover:underline"
+                  className="text-xs text-baby-blue hover:underline"
                 >
                   Zapomniałeś hasła?
                 </Link>

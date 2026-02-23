@@ -29,11 +29,14 @@ import {
   type TrainerFormValues,
 } from "@/lib/validations"
 
+const PASSWORD_MAX_LENGTH = 30
+
 export default function RegisterPage() {
   const [showPasswordTrainee, setShowPasswordTrainee] = useState(false)
   const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState<"trainee" | "trainer">("trainee")
 
+ 
   const traineeForm = useForm<TraineeFormValues>({
     resolver: zodResolver(traineeSchema),
     mode: "onChange",
@@ -65,6 +68,10 @@ export default function RegisterPage() {
       terms: false,
     },
   })
+
+  const traineePasswordValue = traineeForm.watch("password") || ""
+  const trainerPasswordValue = trainerForm.watch("password") || ""
+
 
   const handleTabChange = (value: string) => {
     const tab = value === "trainer" ? "trainer" : "trainee"
@@ -216,6 +223,7 @@ export default function RegisterPage() {
                       type={showPasswordTrainee ? "text" : "password"}
                       className="pr-10"
                       aria-invalid={!!traineeForm.formState.errors.password}
+                      maxLength={PASSWORD_MAX_LENGTH}
                       {...traineeForm.register("password")}
                     />
                     <button
@@ -228,9 +236,12 @@ export default function RegisterPage() {
                       {showPasswordTrainee ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-300">
-                    Min. 8 znaków: małe i wielkie litery, cyfry
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <p>Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                    <span className="ml-1 pr-1">
+                      {traineePasswordValue.length}/{PASSWORD_MAX_LENGTH}
+                    </span>
+                  </div>
                   {traineeForm.formState.errors.password && (
                     <p className="text-xs text-destructive">
                       {traineeForm.formState.errors.password.message}
@@ -354,6 +365,7 @@ export default function RegisterPage() {
                       type={showPasswordTrainer ? "text" : "password"}
                       className="pr-10"
                       aria-invalid={!!trainerForm.formState.errors.password}
+                      maxLength={PASSWORD_MAX_LENGTH}
                       {...trainerForm.register("password")}
                     />
                     <button
@@ -366,9 +378,12 @@ export default function RegisterPage() {
                       {showPasswordTrainer ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-300">
-                    Min. 8 znaków: małe i wielkie litery, cyfry
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <p>Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                    <span className="ml-1 pr-1">
+                      {trainerPasswordValue.length}/{PASSWORD_MAX_LENGTH}
+                    </span>
+                  </div>
                   {trainerForm.formState.errors.password && (
                     <p className="text-xs text-destructive">
                       {trainerForm.formState.errors.password.message}
