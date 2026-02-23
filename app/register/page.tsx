@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,11 +29,14 @@ import {
   type TrainerFormValues,
 } from "@/lib/validations"
 
+const PASSWORD_MAX_LENGTH = 30
+
 export default function RegisterPage() {
   const [showPasswordTrainee, setShowPasswordTrainee] = useState(false)
   const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState<"trainee" | "trainer">("trainee")
 
+ 
   const traineeForm = useForm<TraineeFormValues>({
     resolver: zodResolver(traineeSchema),
     mode: "onChange",
@@ -65,6 +69,10 @@ export default function RegisterPage() {
     },
   })
 
+  const traineePasswordValue = traineeForm.watch("password") || ""
+  const trainerPasswordValue = trainerForm.watch("password") || ""
+
+
   const handleTabChange = (value: string) => {
     const tab = value === "trainer" ? "trainer" : "trainee"
     setActiveTab(tab)
@@ -77,12 +85,12 @@ export default function RegisterPage() {
   }
 
   const onSubmitTrainee = (data: TraineeFormValues) => {
-    // TODO: obsługa rejestracji podopiecznego
+    // TODO: implement registration handling for trainee
     console.log("Trainee register", data)
   }
 
   const onSubmitTrainer = (data: TrainerFormValues) => {
-    // TODO: obsługa rejestracji trenera
+    // TODO: implement registration handling for trainer
     console.log("Trainer register", data)
   }
 
@@ -215,6 +223,7 @@ export default function RegisterPage() {
                       type={showPasswordTrainee ? "text" : "password"}
                       className="pr-10"
                       aria-invalid={!!traineeForm.formState.errors.password}
+                      maxLength={PASSWORD_MAX_LENGTH}
                       {...traineeForm.register("password")}
                     />
                     <button
@@ -224,16 +233,15 @@ export default function RegisterPage() {
                       }
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainee ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPasswordTrainee ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-300">
-                    Min. 8 znaków: małe i wielkie litery, cyfry
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <p>Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                    <span className="ml-1 pr-1">
+                      {traineePasswordValue.length}/{PASSWORD_MAX_LENGTH}
+                    </span>
+                  </div>
                   {traineeForm.formState.errors.password && (
                     <p className="text-xs text-destructive">
                       {traineeForm.formState.errors.password.message}
@@ -357,6 +365,7 @@ export default function RegisterPage() {
                       type={showPasswordTrainer ? "text" : "password"}
                       className="pr-10"
                       aria-invalid={!!trainerForm.formState.errors.password}
+                      maxLength={PASSWORD_MAX_LENGTH}
                       {...trainerForm.register("password")}
                     />
                     <button
@@ -366,16 +375,15 @@ export default function RegisterPage() {
                       }
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainer ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPasswordTrainer ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-zinc-300">
-                    Min. 8 znaków: małe i wielkie litery, cyfry
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <p>Min. 8 znaków: małe i wielkie litery, cyfry</p>
+                    <span className="ml-1 pr-1">
+                      {trainerPasswordValue.length}/{PASSWORD_MAX_LENGTH}
+                    </span>
+                  </div>
                   {trainerForm.formState.errors.password && (
                     <p className="text-xs text-destructive">
                       {trainerForm.formState.errors.password.message}
@@ -509,12 +517,19 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full " type="submit">
+                <Button className="w-full" type="submit">
                   Utwórz konto trenera
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="text-center text-sm text-zinc-400 pt-6">
+              Masz już konto?{" "}
+              <Link href="/" className="text-baby-blue hover:underline">
+                Zaloguj się
+              </Link>
+            </div>
         </CardContent>
       </Card>
     </div>
