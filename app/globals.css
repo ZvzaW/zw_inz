@@ -49,6 +49,8 @@
 
   --color-gold: #F0DAA7;
   --color-baby-blue: #8CA0D0;
+  --color-dirty-navy: #212530;
+  --color-dark-navy: #15181f;
 }
 
 :root {
@@ -85,11 +87,13 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
   
   --radius: 1rem; 
-  --gold: #F0DAA7; 
-  --baby-blue: #8CA0D0;
 }
 
 @layer base {
+  html {
+    background-color: #0F0F0F;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

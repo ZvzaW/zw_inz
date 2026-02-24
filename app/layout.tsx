@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl">
-      <body className={`${montserrat.className} ${michroma.variable} antialiased`}>
+      <body className={`${montserrat.className} ${michroma.variable} antialiased overflow-x-hidden`}>
         {children}
       </body>
     </html>

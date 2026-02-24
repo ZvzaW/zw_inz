@@ -98,7 +98,7 @@ export default function RegisterPage() {
 
   //PAGE
   return (
-    <div className="flex min-h-screen items-center justify-center p-10">
+    <div className="flex min-h-screen items-center justify-center p-7 sm:p-10">
       <Card className="w-full max-w-lg">
         <CardHeader className={`text-center`}>
           <CardTitle className="text-2xl font-michroma pb-2">
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-[#14161a]">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-dark-navy">
               <TabsTrigger value="trainee">Podopieczny</TabsTrigger>
               <TabsTrigger value="trainer">Trener</TabsTrigger>
             </TabsList>
@@ -178,7 +178,7 @@ export default function RegisterPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
                 {/*PHONE*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainee-phone">Numer telefonu *</Label>
@@ -201,6 +201,7 @@ export default function RegisterPage() {
                     <Input
                       id="trainee-birthdate"
                       type="date"
+                      className="appearance-none"
                       aria-invalid={
                         !!traineeForm.formState.errors.birthdate
                       }
