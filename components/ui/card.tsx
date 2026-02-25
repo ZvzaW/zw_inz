@@ -7,12 +7,11 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
+        "flex flex-col gap-6 rounded-[32px] px-3 py-7",
 
-        "flex flex-col gap-6 py-7 px-3 rounded-[32px]", 
+        "bg-[#1C1C1C]/40 backdrop-blur-xl" /* background color */,
 
-        "bg-[#1C1C1C]/40 backdrop-blur-xl", /* background color */
-
-        "border border-baby-blue/40 shadow-[0_0_40px_-5px_rgba(140,160,208,0.8)]", /* glow effect */
+        "border-baby-blue/40 border shadow-[0_0_40px_-5px_rgba(140,160,208,0.8)]" /* glow effect */,
 
         className
       )}

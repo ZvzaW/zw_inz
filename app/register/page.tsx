@@ -15,12 +15,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   traineeSchema,
@@ -36,7 +31,6 @@ export default function RegisterPage() {
   const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState<"trainee" | "trainer">("trainee")
 
- 
   const traineeForm = useForm<TraineeFormValues>({
     resolver: zodResolver(traineeSchema),
     mode: "onChange",
@@ -72,7 +66,6 @@ export default function RegisterPage() {
   const traineePasswordValue = traineeForm.watch("password") || ""
   const trainerPasswordValue = trainerForm.watch("password") || ""
 
-
   const handleTabChange = (value: string) => {
     const tab = value === "trainer" ? "trainer" : "trainee"
     setActiveTab(tab)
@@ -94,19 +87,15 @@ export default function RegisterPage() {
     console.log("Trainer register", data)
   }
 
-
-
   //PAGE
   return (
     <div className="flex min-h-screen items-center justify-center p-7 sm:p-10">
       <Card className="w-full max-w-lg">
         <CardHeader className={`text-center`}>
-          <CardTitle className="text-2xl font-michroma pb-2">
+          <CardTitle className="font-michroma pb-2 text-2xl">
             Zarejestruj się
           </CardTitle>
-          <CardDescription>
-            Dołącz jako trener lub podopieczny
-          </CardDescription>
+          <CardDescription>Dołącz jako trener lub podopieczny</CardDescription>
         </CardHeader>
         <CardContent>
           {/*Role picker*/}
@@ -115,11 +104,10 @@ export default function RegisterPage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-dark-navy">
+            <TabsList className="bg-dark-navy mb-6 grid w-full grid-cols-2">
               <TabsTrigger value="trainee">Podopieczny</TabsTrigger>
               <TabsTrigger value="trainer">Trener</TabsTrigger>
             </TabsList>
-
 
             {/* TRAINEE TAB */}
             <TabsContent value="trainee">
@@ -128,7 +116,7 @@ export default function RegisterPage() {
                 onSubmit={traineeForm.handleSubmit(onSubmitTrainee)}
               >
                 <div className="grid grid-cols-2 gap-4">
-                {/*NAME*/}
+                  {/*NAME*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainee-name">Imię *</Label>
                     <Input
@@ -138,13 +126,13 @@ export default function RegisterPage() {
                       {...traineeForm.register("name")}
                     />
                     {traineeForm.formState.errors.name && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {traineeForm.formState.errors.name.message}
                       </p>
                     )}
                   </div>
 
-                {/*SURNAME*/}
+                  {/*SURNAME*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainee-surname">Nazwisko *</Label>
                     <Input
@@ -154,7 +142,7 @@ export default function RegisterPage() {
                       {...traineeForm.register("surname")}
                     />
                     {traineeForm.formState.errors.surname && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {traineeForm.formState.errors.surname.message}
                       </p>
                     )}
@@ -172,14 +160,14 @@ export default function RegisterPage() {
                     {...traineeForm.register("email")}
                   />
                   {traineeForm.formState.errors.email && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {traineeForm.formState.errors.email.message}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
-                {/*PHONE*/}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
+                  {/*PHONE*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainee-phone">Numer telefonu *</Label>
                     <Input
@@ -189,26 +177,24 @@ export default function RegisterPage() {
                       {...traineeForm.register("phone")}
                     />
                     {traineeForm.formState.errors.phone && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {traineeForm.formState.errors.phone.message}
                       </p>
                     )}
                   </div>
 
-                {/*BIRTHDATE*/}
+                  {/*BIRTHDATE*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainee-birthdate">Data urodzenia *</Label>
                     <Input
                       id="trainee-birthdate"
                       type="date"
                       className="appearance-none"
-                      aria-invalid={
-                        !!traineeForm.formState.errors.birthdate
-                      }
+                      aria-invalid={!!traineeForm.formState.errors.birthdate}
                       {...traineeForm.register("birthdate")}
                     />
                     {traineeForm.formState.errors.birthdate && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {traineeForm.formState.errors.birthdate.message}
                       </p>
                     )}
@@ -232,9 +218,13 @@ export default function RegisterPage() {
                       onClick={() =>
                         setShowPasswordTrainee(!showPasswordTrainee)
                       }
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                      className="absolute top-1/2 right-3.5 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainee ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPasswordTrainee ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
                     </button>
                   </div>
                   <div className="flex items-center justify-between text-xs text-zinc-400">
@@ -244,13 +234,13 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   {traineeForm.formState.errors.password && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {traineeForm.formState.errors.password.message}
                     </p>
                   )}
                 </div>
 
-                {/*TERMS*/} 
+                {/*TERMS*/}
                 <div className="flex items-center space-x-2">
                   <Controller
                     name="terms"
@@ -272,7 +262,7 @@ export default function RegisterPage() {
                   </Label>
                 </div>
                 {traineeForm.formState.errors.terms && (
-                  <p className="text-xs text-destructive -translate-y-4">
+                  <p className="text-destructive -translate-y-4 text-xs">
                     {traineeForm.formState.errors.terms.message}
                   </p>
                 )}
@@ -283,7 +273,7 @@ export default function RegisterPage() {
               </form>
             </TabsContent>
 
-{/*------------------------------------------------------------------------------------- */}
+            {/*------------------------------------------------------------------------------------- */}
             {/* TRAINER TAB */}
             <TabsContent value="trainer">
               <form
@@ -291,7 +281,7 @@ export default function RegisterPage() {
                 onSubmit={trainerForm.handleSubmit(onSubmitTrainer)}
               >
                 <div className="grid grid-cols-2 gap-4">
-                {/*NAME*/}
+                  {/*NAME*/}
                   <div className="space-y-1.5">
                     <Label htmlFor="trainer-name">Imię *</Label>
                     <Input
@@ -301,7 +291,7 @@ export default function RegisterPage() {
                       {...trainerForm.register("name")}
                     />
                     {trainerForm.formState.errors.name && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {trainerForm.formState.errors.name.message}
                       </p>
                     )}
@@ -317,7 +307,7 @@ export default function RegisterPage() {
                       {...trainerForm.register("surname")}
                     />
                     {trainerForm.formState.errors.surname && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {trainerForm.formState.errors.surname.message}
                       </p>
                     )}
@@ -335,7 +325,7 @@ export default function RegisterPage() {
                     {...trainerForm.register("email")}
                   />
                   {trainerForm.formState.errors.email && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {trainerForm.formState.errors.email.message}
                     </p>
                   )}
@@ -351,7 +341,7 @@ export default function RegisterPage() {
                     {...trainerForm.register("phone")}
                   />
                   {trainerForm.formState.errors.phone && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {trainerForm.formState.errors.phone.message}
                     </p>
                   )}
@@ -374,9 +364,13 @@ export default function RegisterPage() {
                       onClick={() =>
                         setShowPasswordTrainer(!showPasswordTrainer)
                       }
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                      className="absolute top-1/2 right-3.5 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                     >
-                      {showPasswordTrainer ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPasswordTrainer ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
                     </button>
                   </div>
                   <div className="flex items-center justify-between text-xs text-zinc-400">
@@ -386,15 +380,15 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   {trainerForm.formState.errors.password && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {trainerForm.formState.errors.password.message}
                     </p>
                   )}
                 </div>
 
                 {/* WORKPLACE SECTION */}
-                <div className="p-3.5 border border-gold rounded-md space-y-4 mt-2">
-                  <Label className="font-semibold text-gold w-full justify-center">
+                <div className="border-gold mt-2 space-y-4 rounded-md border p-3.5">
+                  <Label className="text-gold w-full justify-center font-semibold">
                     Główne miejsce pracy
                   </Label>
 
@@ -411,13 +405,13 @@ export default function RegisterPage() {
                       placeholder="np. Siłownia X"
                     />
                     {trainerForm.formState.errors.workplaceName && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {trainerForm.formState.errors.workplaceName.message}
                       </p>
                     )}
                   </div>
 
-                {/*STREET*/}
+                  {/*STREET*/}
                   <div className="space-y-1">
                     <Label htmlFor="street">Ulica *</Label>
                     <Input
@@ -427,7 +421,7 @@ export default function RegisterPage() {
                       {...trainerForm.register("street")}
                     />
                     {trainerForm.formState.errors.street && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {trainerForm.formState.errors.street.message}
                       </p>
                     )}
@@ -446,16 +440,13 @@ export default function RegisterPage() {
                         {...trainerForm.register("buildingNumber")}
                       />
                       {trainerForm.formState.errors.buildingNumber && (
-                        <p className="text-xs text-destructive">
-                          {
-                            trainerForm.formState.errors.buildingNumber
-                              .message
-                          }
+                        <p className="text-destructive text-xs">
+                          {trainerForm.formState.errors.buildingNumber.message}
                         </p>
                       )}
                     </div>
 
-                    <div className="pb-1 text-center text-md">/</div>
+                    <div className="text-md pb-1 text-center">/</div>
                     {/*FLAT NUMBER*/}
                     <div className="space-y-1">
                       <Label htmlFor="flatnumber">Nr mieszk.</Label>
@@ -466,14 +457,14 @@ export default function RegisterPage() {
                         {...trainerForm.register("flatNumber")}
                       />
                       {trainerForm.formState.errors.flatNumber && (
-                        <p className="text-xs text-destructive">
+                        <p className="text-destructive text-xs">
                           {trainerForm.formState.errors.flatNumber.message}
                         </p>
                       )}
                     </div>
                   </div>
 
-                {/*CITY*/}
+                  {/*CITY*/}
                   <div className="space-y-1">
                     <Label htmlFor="city">Miasto *</Label>
                     <Input
@@ -483,19 +474,19 @@ export default function RegisterPage() {
                       {...trainerForm.register("city")}
                     />
                     {trainerForm.formState.errors.city && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {trainerForm.formState.errors.city.message}
                       </p>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-300 ">
+                  <p className="text-xs text-zinc-300">
                     Kolejne miejsca pracy możesz dodać po zalogowaniu do
                     systemu.
                   </p>
                 </div>
 
                 {/*TERMS*/}
-                <div className="flex items-center space-x-2 ">
+                <div className="flex items-center space-x-2">
                   <Controller
                     name="terms"
                     control={trainerForm.control}
@@ -513,7 +504,7 @@ export default function RegisterPage() {
                   </Label>
                 </div>
                 {trainerForm.formState.errors.terms && (
-                  <p className="text-xs text-destructive -translate-y-4">
+                  <p className="text-destructive -translate-y-4 text-xs">
                     {trainerForm.formState.errors.terms.message}
                   </p>
                 )}
@@ -525,12 +516,12 @@ export default function RegisterPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="text-center text-sm text-zinc-400 pt-6">
-              Masz już konto?{" "}
-              <Link href="/" className="text-baby-blue hover:underline">
-                Zaloguj się
-              </Link>
-            </div>
+          <div className="pt-6 text-center text-sm text-zinc-400">
+            Masz już konto?{" "}
+            <Link href="/" className="text-baby-blue hover:underline">
+              Zaloguj się
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

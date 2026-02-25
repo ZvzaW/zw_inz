@@ -16,16 +16,14 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isResourcesOpen, setIsResourcesOpen] = useState(false)
 
-  
-
   //Main links
   const navLinks = [
     { name: "Czat", href: "/dashboard/chat" },
     { name: "Treningi", href: "/dashboard/workouts" },
-    { name: "Podopieczni", href: "/dashboard/clients" }, 
+    { name: "Podopieczni", href: "/dashboard/clients" },
   ]
 
-  //Dropdown menu - ZASOBY 
+  //Dropdown menu - ZASOBY
   const resourceLinks = [
     { name: "Ćwiczenia", href: "/dashboard/exercises" },
     { name: "Plany treningowe", href: "/dashboard/plans" },
@@ -34,28 +32,26 @@ export default function Navbar() {
   const isActive = (path: string) => pathname.startsWith(path)
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#1a1e2a]/40 backdrop-blur-xl border-b border-baby-blue font-michroma">
+    <nav className="border-baby-blue font-michroma sticky top-0 z-50 w-full border-b bg-[#1a1e2a]/40 backdrop-blur-xl">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          
+        <div className="flex h-20 items-center justify-between">
           {/*LOGO*/}
-          <Link href="/dashboard" className="flex items-center group">
-            <div 
-            className="relative w-32 h-12 border flex items-center justify-center group-hover:border-baby-blue transition-colors"
-            title="Strona główna">
-              <span>
-                LOGO
-              </span>
+          <Link href="/dashboard" className="group flex items-center">
+            <div
+              className="group-hover:border-baby-blue relative flex h-12 w-32 items-center justify-center border transition-colors"
+              title="Strona główna"
+            >
+              <span>LOGO</span>
             </div>
           </Link>
 
           {/*DESKTOP MENU*/}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden items-center space-x-10 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`transition-colors hover:text-baby-blue ${
+                className={`hover:text-baby-blue transition-colors ${
                   isActive(link.href) ? "text-baby-blue" : "text-white"
                 }`}
               >
@@ -64,15 +60,20 @@ export default function Navbar() {
             ))}
 
             {/* DROPDOWN: ZASOBY */}
-            <DropdownMenu open={isResourcesOpen} onOpenChange={setIsResourcesOpen} modal={false}>
+            <DropdownMenu
+              open={isResourcesOpen}
+              onOpenChange={setIsResourcesOpen}
+              modal={false}
+            >
               <DropdownMenuTrigger
                 asChild
                 onMouseEnter={() => setIsResourcesOpen(true)}
                 onMouseLeave={() => setIsResourcesOpen(false)}
               >
                 <button
-                  className={`flex items-center transition-colors hover:text-baby-blue py-7 ${
-                    isActive("/dashboard/exercises") || isActive("/dashboard/plans")
+                  className={`hover:text-baby-blue flex items-center py-7 transition-colors ${
+                    isActive("/dashboard/exercises") ||
+                    isActive("/dashboard/plans")
                       ? "text-baby-blue"
                       : "text-white"
                   }`}
@@ -84,17 +85,18 @@ export default function Navbar() {
                 onMouseEnter={() => setIsResourcesOpen(true)}
                 onMouseLeave={() => setIsResourcesOpen(false)}
                 sideOffset={0}
-                className="w-52 border-baby-blue bg-dark-navy"
+                className="border-baby-blue bg-dark-navy w-52"
               >
                 {resourceLinks.map((link) => (
                   <DropdownMenuItem
                     key={link.name}
                     onClick={() => setIsResourcesOpen(false)}
-                    className={` m-2
-                      ${isActive(link.href) ? "text-baby-blue bg-dirty-navy" : "hover:bg-dirty-navy"}
-                    `}
+                    className={`m-2 ${isActive(link.href) ? "text-baby-blue bg-dirty-navy" : "hover:bg-dirty-navy"} `}
                   >
-                    <Link href={link.href} className="block w-full font-michroma p-1">
+                    <Link
+                      href={link.href}
+                      className="font-michroma block w-full p-1"
+                    >
                       {link.name}
                     </Link>
                   </DropdownMenuItem>
@@ -104,29 +106,29 @@ export default function Navbar() {
           </div>
 
           {/*DESKTOP: Profile, Log-out*/}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link 
+          <div className="hidden items-center space-x-4 md:flex">
+            <Link
               href="/dashboard/profile"
               title="Profil"
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all ${
                 isActive("/dashboard/profile")
-                  ? "text-baby-blue border-2 border-baby-blue"
-                  : "text-zinc-300 border border-zinc-300 hover:text-baby-blue hover:border-baby-blue hover:border-2"
+                  ? "text-baby-blue border-baby-blue border-2"
+                  : "hover:text-baby-blue hover:border-baby-blue border border-zinc-300 text-zinc-300 hover:border-2"
               }`}
             >
               <User size={20} />
             </Link>
-            <button 
+            <button
               title="Wyloguj się"
-              className="w-12 h-12 rounded-full border border-zinc-300 flex items-center justify-center text-zinc-300 hover:text-red-400 hover:border-red-400 hover:border-2 transition-all"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-300 text-zinc-300 transition-all hover:border-2 hover:border-red-400 hover:text-red-400"
             >
               <LogOut size={20} />
             </button>
           </div>
 
-{/*----------------------------------------------------------------------------------*/}
+          {/*----------------------------------------------------------------------------------*/}
           {/*MENU ICON (MOBILE)*/}
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-baby-blue p-2"
@@ -139,15 +141,17 @@ export default function Navbar() {
 
       {/*MOBILE MENU*/}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-dark-navy border-t border-baby-blue absolute top-20 left-0 w-full px-4 pt-2 pb-6">
+        <div className="bg-dark-navy border-baby-blue absolute top-20 left-0 w-full border-t px-4 pt-2 pb-6 md:hidden">
           <div className="flex flex-col space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-base font-medium ${
-                  isActive(link.href) ? "bg-dirty-navy text-baby-blue" : "text-white hover:bg-dirty-navy"
+                className={`block rounded-xl px-4 py-3 text-base font-medium ${
+                  isActive(link.href)
+                    ? "bg-dirty-navy text-baby-blue"
+                    : "hover:bg-dirty-navy text-white"
                 }`}
               >
                 {link.name}
@@ -159,8 +163,10 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-base font-medium ${
-                  isActive(link.href) ? "bg-dirty-navy text-baby-blue" : "text-white hover:bg-dirty-navy"
+                className={`block rounded-xl px-4 py-3 text-base font-medium ${
+                  isActive(link.href)
+                    ? "bg-dirty-navy text-baby-blue"
+                    : "hover:bg-dirty-navy text-white"
                 }`}
               >
                 {link.name}
@@ -168,21 +174,19 @@ export default function Navbar() {
             ))}
 
             {/*MOBILE: Profile, Log-out*/}
-            <div className="pt-4 mt-2 border-t border-zinc-700 flex gap-4 px-4">
-              <Link 
+            <div className="mt-2 flex gap-4 border-t border-zinc-700 px-4 pt-4">
+              <Link
                 href="/dashboard/profile"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center justify-center gap-2 flex-1 bg-dirty-navy py-3 rounded-xl border ${
+                className={`bg-dirty-navy flex flex-1 items-center justify-center gap-2 rounded-xl border py-3 ${
                   isActive("/dashboard/profile")
                     ? "text-baby-blue border-baby-blue"
-                    : "text-zinc-300 border-zinc-700"
+                    : "border-zinc-700 text-zinc-300"
                 }`}
               >
                 <User size={20} /> Profil
               </Link>
-              <button 
-                className="flex items-center justify-center gap-2 flex-1 bg-dirty-navy py-3 rounded-xl text-zinc-300 hover:text-red-400 border border-zinc-700"
-              >
+              <button className="bg-dirty-navy flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-700 py-3 text-zinc-300 hover:text-red-400">
                 <LogOut size={20} /> Wyloguj
               </button>
             </div>
