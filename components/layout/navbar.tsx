@@ -4,10 +4,19 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, ChevronDown, User, LogOut } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 
 export default function Navbar() {
   const pathname = usePathname() || ""
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false)
+
+  
 
   //Main links
   const navLinks = [
@@ -55,32 +64,43 @@ export default function Navbar() {
             ))}
 
             {/* DROPDOWN: ZASOBY */}
-            <div className="relative group">
-              <button className={`flex items-center gap-1 transition-colors hover:text-baby-blue py-8 ${
-                isActive("/dashboard/exercises") || isActive("/dashboard/plans") ? "text-baby-blue" : "text-white"
-              }`}>
-                Zasoby <ChevronDown size={16}/>
-              </button>
-              
-              {/*dropdown content*/}
-              <div className="absolute top-[84px] w-52 invisible group-hover:visible transition-all duration-200">
-                <div className="bg-dark-navy border border-baby-blue rounded-2xl overflow-hidden flex flex-col p-2 gap-1">
-                  {resourceLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={`px-4 py-3 text-sm rounded-xl transition-colors ${
-                        isActive(link.href)
-                          ? "text-baby-blue bg-dirty-navy" : "hover:bg-dirty-navy"
-                      }`}
-                    >
+            <DropdownMenu open={isResourcesOpen} onOpenChange={setIsResourcesOpen} modal={false}>
+              <DropdownMenuTrigger
+                asChild
+                onMouseEnter={() => setIsResourcesOpen(true)}
+                onMouseLeave={() => setIsResourcesOpen(false)}
+              >
+                <button
+                  className={`flex items-center transition-colors hover:text-baby-blue py-7 ${
+                    isActive("/dashboard/exercises") || isActive("/dashboard/plans")
+                      ? "text-baby-blue"
+                      : "text-white"
+                  }`}
+                >
+                  Zasoby <ChevronDown size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                onMouseEnter={() => setIsResourcesOpen(true)}
+                onMouseLeave={() => setIsResourcesOpen(false)}
+                sideOffset={0}
+                className="w-52 border-baby-blue bg-dark-navy"
+              >
+                {resourceLinks.map((link) => (
+                  <DropdownMenuItem
+                    key={link.name}
+                    onClick={() => setIsResourcesOpen(false)}
+                    className={` m-2
+                      ${isActive(link.href) ? "text-baby-blue bg-dirty-navy" : "hover:bg-dirty-navy"}
+                    `}
+                  >
+                    <Link href={link.href} className="block w-full font-michroma p-1">
                       {link.name}
                     </Link>
-                    
-                  ))}
-                </div>
-              </div>
-            </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/*DESKTOP: Profile, Log-out*/}
