@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
-import { Montserrat, Michroma } from "next/font/google"
+import { Mina, Michroma } from "next/font/google"
 import "./globals.css"
 
-const montserrat = Montserrat({
+const mina = Mina({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-montserrat",
+  variable: "--font-mina",
+  weight: "400",
 })
 
 const michroma = Michroma({
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body
-        className={`${montserrat.className} ${michroma.variable} overflow-x-hidden antialiased`}
+        className={`${mina.className} ${michroma.variable} overflow-x-hidden antialiased`}
       >
         {children}
       </body>
