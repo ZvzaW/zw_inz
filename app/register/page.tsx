@@ -128,7 +128,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="bg-dark-navy mb-6 grid w-full grid-cols-2">
+            <TabsList className="mb-6 grid w-full grid-cols-2">
               <TabsTrigger value="trainee">Podopieczny</TabsTrigger>
               <TabsTrigger value="trainer">Trener</TabsTrigger>
             </TabsList>
@@ -145,7 +145,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-name">Imię *</Label>
+                    <Label htmlFor="trainee-name">Imię*</Label>
                     <Input
                       id="trainee-name"
                       placeholder="Anna"
@@ -161,7 +161,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*SURNAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-surname">Nazwisko *</Label>
+                    <Label htmlFor="trainee-surname">Nazwisko*</Label>
                     <Input
                       id="trainee-surname"
                       placeholder="Kowalska"
@@ -178,7 +178,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 {/*EMAIL*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainee-email">Adres e-mail *</Label>
+                  <Label htmlFor="trainee-email">Adres e-mail*</Label>
                   <Input
                     id="trainee-email"
                     type="email"
@@ -196,7 +196,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
                   {/*PHONE*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-phone">Numer telefonu *</Label>
+                    <Label htmlFor="trainee-phone">Numer telefonu*</Label>
                     <Input
                       id="trainee-phone"
                       type="tel"
@@ -212,7 +212,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*BIRTHDATE*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-birthdate">Data urodzenia *</Label>
+                    <Label htmlFor="trainee-birthdate">Data urodzenia*</Label>
                     <Input
                       id="trainee-birthdate"
                       type="date"
@@ -230,7 +230,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 {/*PASSWORD*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainee-password">Hasło *</Label>
+                  <Label htmlFor="trainee-password">Hasło*</Label>
                   <div className="relative">
                     <Input
                       id="trainee-password"
@@ -285,7 +285,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                     htmlFor="terms-trainee"
                     className="text-sm font-normal"
                   >
-                    Wyrażam zgodę na przetwarzanie danych. *
+                    Wyrażam zgodę na przetwarzanie danych.*
                   </Label>
                 </div>
                 {traineeForm.formState.errors.terms && (
@@ -322,7 +322,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainer-name">Imię *</Label>
+                    <Label htmlFor="trainer-name">Imię*</Label>
                     <Input
                       id="trainer-name"
                       placeholder="Anna"
@@ -338,7 +338,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*SURANME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainer-surname">Nazwisko *</Label>
+                    <Label htmlFor="trainer-surname">Nazwisko*</Label>
                     <Input
                       id="trainer-surname"
                       placeholder="Kowalska"
@@ -355,7 +355,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 {/*EMAIL*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-email">Adres e-mail *</Label>
+                  <Label htmlFor="trainer-email">Adres e-mail*</Label>
                   <Input
                     id="trainer-email"
                     type="email"
@@ -372,7 +372,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 {/*PHONE*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-phone">Numer telefonu *</Label>
+                  <Label htmlFor="trainer-phone">Numer telefonu*</Label>
                   <Input
                     id="trainer-phone"
                     type="tel"
@@ -388,7 +388,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 {/*PASSWORD*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-password">Hasło *</Label>
+                  <Label htmlFor="trainer-password">Hasło*</Label>
                   <div className="relative">
                     <Input
                       id="trainer-password"
@@ -433,7 +433,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*WORKPLACE NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="workplace-name">Nazwa miejsca *</Label>
+                    <Label htmlFor="workplace-name">Nazwa miejsca*</Label>
                     <Input
                       id="workplace-name"
                       className="border-gold"
@@ -452,7 +452,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*STREET*/}
                   <div className="space-y-1">
-                    <Label htmlFor="street">Ulica *</Label>
+                    <Label htmlFor="street">Ulica*</Label>
                     <Input
                       id="street"
                       className="border-gold"
@@ -469,7 +469,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                   <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
                     {/*BUILDING NUMBER*/}
                     <div className="space-y-1">
-                      <Label htmlFor="building-number">Nr bud. *</Label>
+                      <Label htmlFor="building-number">Nr bud.*</Label>
                       <Input
                         id="building-number"
                         className="border-gold"
@@ -505,7 +505,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                   {/*CITY*/}
                   <div className="space-y-1">
-                    <Label htmlFor="city">Miasto *</Label>
+                    <Label htmlFor="city">Miasto*</Label>
                     <Input
                       id="city"
                       className="border-gold"
@@ -539,7 +539,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                     )}
                   />
                   <Label htmlFor="terms" className="text-sm font-normal">
-                    Wyrażam zgodę na przetwarzanie danych. *
+                    Wyrażam zgodę na przetwarzanie danych.*
                   </Label>
                 </div>
                 {trainerForm.formState.errors.terms && (
