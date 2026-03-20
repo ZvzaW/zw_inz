@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model coaching_request {
@@ -126,8 +126,8 @@ model trainee {
 
 model trainer {
   id                 String             @id(map: "trainer_pk") @db.Uuid
-  work_description   String
-  price_per_training Int
+  work_description   String?
+  price_per_training Int?
   is_public          Boolean            @default(true)
   coaching_request   coaching_request[]
   cooperation        cooperation[]

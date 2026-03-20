@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -16,6 +18,29 @@ export default function LoginPage() {
     // TO-DO: implement login handling
   }
 
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const isRegistered = searchParams.get("registered") === "true"
+  const hasShownToast = useRef(false)
+
+  useEffect(() => {
+    if (isRegistered && !hasShownToast.current) {
+      // Wyświetla zielony Toast, który zniknie po ok. 4 sekundach
+      hasShownToast.current = true
+      toast.success("Konto utworzone pomyślnie!", {
+        description: "Możesz się teraz zalogować.",
+        duration: 4000,
+      })
+
+      // Opcjonalnie: czyścimy URL, żeby po odświeżeniu toast nie wyskoczył znowu
+      const newParams = new URLSearchParams(searchParams.toString())
+      newParams.delete("registered")
+      router.replace(`/?${newParams.toString()}`, { scroll: false })
+    }
+  }, [isRegistered, searchParams, router])
+
+  
   //PAGE
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

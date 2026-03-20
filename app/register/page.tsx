@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -23,6 +24,7 @@ import {
   type TraineeFormValues,
   type TrainerFormValues,
 } from "@/lib/validations"
+import { registerAction } from "@/actions/auth"
 
 const PASSWORD_MAX_LENGTH = 30
 
@@ -30,6 +32,8 @@ export default function RegisterPage() {
   const [showPasswordTrainee, setShowPasswordTrainee] = useState(false)
   const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState<"trainee" | "trainer">("trainee")
+  const [traineeError, setTraineeError] = useState<string | null>(null)
+  const [trainerError, setTrainerError] = useState<string | null>(null)
 
   const traineeForm = useForm<TraineeFormValues>({
     resolver: zodResolver(traineeSchema),
@@ -65,10 +69,13 @@ export default function RegisterPage() {
 
   const traineePasswordValue = traineeForm.watch("password") || ""
   const trainerPasswordValue = trainerForm.watch("password") || ""
+  const [isPending, setIsPending] = useState(false)
 
   const handleTabChange = (value: string) => {
     const tab = value === "trainer" ? "trainer" : "trainee"
     setActiveTab(tab)
+    setTraineeError(null)
+    setTrainerError(null)
 
     if (tab === "trainee") {
       traineeForm.reset()
@@ -77,15 +84,32 @@ export default function RegisterPage() {
     }
   }
 
-  const onSubmitTrainee = (data: TraineeFormValues) => {
-    // TODO: implement registration handling for trainee
-    console.log("Trainee register", data)
+const onSubmitTrainee = async (data: TraineeFormValues) => {
+  setTraineeError(null)
+  setIsPending(true)
+  try{
+    const result = await registerAction(data, "trainee")
+    if (result?.error) {
+      setTraineeError(result.error)
+    }
+  }finally{
+    setIsPending(false);
   }
+}
 
-  const onSubmitTrainer = (data: TrainerFormValues) => {
-    // TODO: implement registration handling for trainer
-    console.log("Trainer register", data)
+const onSubmitTrainer = async (data: TrainerFormValues) => {
+  setTrainerError(null)
+  setIsPending(true)
+  try{
+    const result = await registerAction(data, "trainer")
+    if (result?.error) {
+      setTrainerError(result.error)
+    }
+  }finally{
+    setIsPending(false);
   }
+  
+}
 
   //PAGE
   return (
@@ -114,6 +138,9 @@ export default function RegisterPage() {
               <form
                 className="space-y-6"
                 onSubmit={traineeForm.handleSubmit(onSubmitTrainee)}
+                onChange={() => {
+                  if (traineeError) setTraineeError(null)
+                }}
               >
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
@@ -267,8 +294,17 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full" type="submit">
-                  Utwórz konto podopiecznego
+                {traineeError && (
+                  <Alert variant="destructive" className="mx-auto">
+                    <AlertDescription>{traineeError}</AlertDescription>
+                  </Alert>
+                )}
+                <Button className="w-full" type="submit" disabled={isPending}>
+                {isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Utwórz konto podopiecznego"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -279,6 +315,9 @@ export default function RegisterPage() {
               <form
                 className="space-y-6"
                 onSubmit={trainerForm.handleSubmit(onSubmitTrainer)}
+                onChange={() => {
+                  if (trainerError) setTrainerError(null)
+                }}
               >
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
@@ -509,8 +548,18 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full" type="submit">
-                  Utwórz konto trenera
+                {trainerError && (
+                  <Alert variant="destructive" className="mx-auto">
+                    <AlertDescription>{trainerError}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button className="w-full" type="submit" disabled={isPending}>
+                {isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Utwórz konto trenera"
+                  )}
                 </Button>
               </form>
             </TabsContent>

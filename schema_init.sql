@@ -1,7 +1,4 @@
--- Włączenie rozszerzenia dla starszych wersji (opcjonalnie, gen_random_uuid() zazwyczaj wystarcza)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Tabele podstawowe (bez kluczy obcych na początku dla czystości)
 
 CREATE TABLE "user" (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -15,20 +12,19 @@ CREATE TABLE "user" (
 );
 
 CREATE TABLE trainer (
-    id uuid NOT NULL, -- PK z tabeli user (ręcznie przekazywane przy rejestracji)
-    work_description text NOT NULL,
-    price_per_training int NOT NULL, -- Poprawiłem PricePerTraining na snake_case dla spójności
+    id uuid NOT NULL, -- PK z user
+    work_description text NULL,
+    price_per_training int NULL, 
     is_public boolean NOT NULL DEFAULT true,
     CONSTRAINT trainer_pk PRIMARY KEY (id)
 );
 
 CREATE TABLE trainee (
-    id uuid NOT NULL, -- PK z tabeli user
+    id uuid NOT NULL, -- PK z user
     birthdate date NOT NULL,
     CONSTRAINT trainee_pk PRIMARY KEY (id)
 );
 
--- Pozostałe tabele
 
 CREATE TABLE workplace (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -132,7 +128,7 @@ CREATE TABLE notification (
     message varchar(255) NOT NULL,
     redirect_url text NULL,
     type varchar(30) NOT NULL,
-    is_read boolean NOT NULL DEFAULT false, -- Poprawione isRead
+    is_read boolean NOT NULL DEFAULT false, 
     CONSTRAINT notification_pk PRIMARY KEY (id)
 );
 
@@ -157,7 +153,7 @@ CREATE TABLE training_comment (
     CONSTRAINT training_comment_pk PRIMARY KEY (id)
 );
 
--- Foreign Keys (Definicje relacji)
+-- Foreign Keys
 
 ALTER TABLE trainer ADD CONSTRAINT trainer_user FOREIGN KEY (id) REFERENCES "user" (id) ON DELETE CASCADE;
 ALTER TABLE trainee ADD CONSTRAINT trainee_user FOREIGN KEY (id) REFERENCES "user" (id) ON DELETE CASCADE;
