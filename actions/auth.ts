@@ -5,6 +5,10 @@ import { traineeSchema, trainerSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import * as argon2 from "argon2"
 import { redirect } from "next/navigation"
+import { signOut, auth } from "@/auth"
+import { signIn } from "@/auth"
+import { AuthError } from "next-auth"
+
 
 export async function registerAction(formData: any, role: "trainee" | "trainer") {
   const schema = role === "trainer" ? trainerSchema : traineeSchema
@@ -55,3 +59,53 @@ export async function registerAction(formData: any, role: "trainee" | "trainer")
 
   redirect("/?registered=true")
 }
+
+
+export async function loginAction(data: any) {
+  const email = data.email;
+  const password = data.password;
+
+  if (!email || !password) {
+    return { error: "Wypełnij wszystkie pola!" };
+  }
+
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false, 
+    });
+    
+    return { success: true };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { error: "Błędny e-mail lub hasło!" };
+        default:
+          return { error: "Wystąpił błąd logowania. Spróbuj ponownie." };
+      }
+    }
+
+    throw error;
+  }
+}
+
+
+export async function logoutAction() {
+    const session = await auth()
+    const tokenToDelete = (session as any)?.refreshToken 
+
+    try{
+        if (tokenToDelete) {
+            await prisma.refresh_token.delete({
+                where: { token: tokenToDelete }
+            })
+        }
+    }catch(error){
+        return {error: "Nie udało się wylogować. Spróbuj ponownie."}
+    }
+    
+  
+    await signOut({ redirectTo: "/" })
+  }

@@ -25,6 +25,19 @@ CREATE TABLE trainee (
     CONSTRAINT trainee_pk PRIMARY KEY (id)
 );
 
+CREATE TABLE trainee (
+    id uuid NOT NULL, -- PK z user
+    birthdate date NOT NULL,
+    CONSTRAINT trainee_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE refresh_token (
+    id uuid  NOT NULL DEFAULT gen_random_uuid(),
+    user_id uuid  NOT NULL,
+    token text  NOT NULL UNIQUE,
+    expires_at timestamp  NOT NULL,
+    CONSTRAINT refresh_token_pk PRIMARY KEY (id)
+);
 
 CREATE TABLE workplace (
     id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -157,6 +170,7 @@ CREATE TABLE training_comment (
 
 ALTER TABLE trainer ADD CONSTRAINT trainer_user FOREIGN KEY (id) REFERENCES "user" (id) ON DELETE CASCADE;
 ALTER TABLE trainee ADD CONSTRAINT trainee_user FOREIGN KEY (id) REFERENCES "user" (id) ON DELETE CASCADE;
+ALTER TABLE refresh_token ADD CONSTRAINT refresh_token_user FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE;
 ALTER TABLE workplace ADD CONSTRAINT workplace_trainer FOREIGN KEY (trainer_id) REFERENCES trainer (id) ON DELETE CASCADE;
 ALTER TABLE coaching_request ADD CONSTRAINT coaching_request_client FOREIGN KEY (trainee_id) REFERENCES trainee (id);
 ALTER TABLE coaching_request ADD CONSTRAINT coaching_request_trainer FOREIGN KEY (trainer_id) REFERENCES trainer (id);

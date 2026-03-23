@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Mina, Michroma } from "next/font/google"
 import { Toaster }  from "@/components/ui/sonner"
+import { AuthProvider } from "@/components/providers/session-provider"
 import "./globals.css"
 
 const mina = Mina({
@@ -30,11 +31,13 @@ export default function RootLayout({
       <body
         className={`${mina.className} ${michroma.variable} overflow-x-hidden antialiased`}
       >
-        {children}
-        <Toaster richColors  position="top-right"  />
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   )
 }
 
-//richColors

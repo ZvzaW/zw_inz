@@ -556,7 +556,7 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
 
                 <Button className="w-full" type="submit" disabled={isPending}>
                 {isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="animate-spin" />
                 ) : (
                   "Utwórz konto trenera"
                   )}
