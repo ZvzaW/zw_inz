@@ -1,22 +1,65 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
+import { loginAction } from "@/actions/auth"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [isPending, setIsPending] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const isRegistered = searchParams.get("registered") === "true"
+  const hasShownToast = useRef(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // TO-DO: implement login handling
+    setIsPending(true)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+
+    try {
+      const result = await loginAction({ email, password })
+
+      if (result?.error) {
+        setLoginError(result.error)
+      } else {
+        router.push("/dashboard")
+        router.refresh()
+      }
+    } catch (error) {
+      toast.error("Wystąpił nieoczekiwany błąd.")
+    } finally {
+      setIsPending(false)
+    }
   }
 
-  //PAGE
+  useEffect(() => {
+    if (isRegistered && !hasShownToast.current) {
+      hasShownToast.current = true
+      toast.success("Konto utworzone pomyślnie!", {
+        description: "Możesz się teraz zalogować.",
+        duration: 4000,
+      })
+
+      const newParams = new URLSearchParams(searchParams.toString())
+      newParams.delete("registered")
+      router.replace(`/?${newParams.toString()}`, { scroll: false })
+    }
+  }, [isRegistered, searchParams, router])
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -24,25 +67,33 @@ export default function LoginPage() {
           <CardTitle className="font-michroma text-2xl">Logowanie</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/*EMAIL*/}
+          <form
+            onSubmit={handleSubmit}
+            onChange={() => setLoginError(null)}
+            className="space-y-6"
+          >
+            {/* EMAIL*/}
             <div className="space-y-1.5">
               <Label htmlFor="email">Adres e-mail</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="anna@example.com"
+                disabled={isPending}
                 required
               />
             </div>
 
-            {/*PASSWORD*/}
+            {/* PASSWORD*/}
             <div className="space-y-1.5">
               <Label htmlFor="password">Hasło</Label>
               <div className="relative">
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  disabled={isPending}
                   required
                 />
                 <button
@@ -54,7 +105,6 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              {/*PASSWORD RESET*/}
               <div className="flex justify-start pt-1 pl-1">
                 <Link
                   href="/forgot-password"
@@ -65,12 +115,23 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              Zaloguj się
+            {loginError && (
+              <Alert variant="destructive" className="mx-auto">
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                </>
+              ) : (
+                "Zaloguj się"
+              )}
             </Button>
           </form>
 
-          {/*REDIRECT TO REGISTRATION*/}
           <div className="pt-6 text-center text-sm text-zinc-400">
             Nie masz jeszcze konta?{" "}
             <Link href="/register" className="text-baby-blue hover:underline">

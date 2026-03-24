@@ -10,11 +10,21 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import { logoutAction } from "@/actions/auth"
+import { toast } from "sonner"
 
 export default function Navbar() {
   const pathname = usePathname() || ""
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isResourcesOpen, setIsResourcesOpen] = useState(false)
+
+  const handleLogout = async () => {
+    const result = await logoutAction()
+
+    if (result?.error) {
+      toast.error(result?.error)
+    }
+  }
 
   //Main links
   const navLinks = [
@@ -119,6 +129,7 @@ export default function Navbar() {
               <User size={20} />
             </Link>
             <button
+              onClick={handleLogout}
               title="Wyloguj się"
               className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-300 text-zinc-300 transition-all hover:border-2 hover:border-red-400 hover:text-red-400"
             >
@@ -186,7 +197,10 @@ export default function Navbar() {
               >
                 <User size={20} /> Profil
               </Link>
-              <button className="bg-dirty-navy flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-700 py-3 text-zinc-300 hover:text-red-400">
+              <button
+                onClick={handleLogout}
+                className="bg-dirty-navy flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-700 py-3 text-zinc-300 hover:text-red-400"
+              >
                 <LogOut size={20} /> Wyloguj
               </button>
             </div>

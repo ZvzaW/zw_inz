@@ -12,11 +12,13 @@ function DropdownMenu({
 }
 
 function DropdownMenuTrigger({
+  className, // Dodaj obsługę className
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   return (
     <DropdownMenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
+      className={cn("outline-none focus:outline-none", className)} // Dodaj te klasy
       {...props}
     />
   )

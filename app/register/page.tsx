@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -23,6 +24,7 @@ import {
   type TraineeFormValues,
   type TrainerFormValues,
 } from "@/lib/validations"
+import { registerAction } from "@/actions/auth"
 
 const PASSWORD_MAX_LENGTH = 30
 
@@ -30,6 +32,8 @@ export default function RegisterPage() {
   const [showPasswordTrainee, setShowPasswordTrainee] = useState(false)
   const [showPasswordTrainer, setShowPasswordTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState<"trainee" | "trainer">("trainee")
+  const [traineeError, setTraineeError] = useState<string | null>(null)
+  const [trainerError, setTrainerError] = useState<string | null>(null)
 
   const traineeForm = useForm<TraineeFormValues>({
     resolver: zodResolver(traineeSchema),
@@ -65,10 +69,13 @@ export default function RegisterPage() {
 
   const traineePasswordValue = traineeForm.watch("password") || ""
   const trainerPasswordValue = trainerForm.watch("password") || ""
+  const [isPending, setIsPending] = useState(false)
 
   const handleTabChange = (value: string) => {
     const tab = value === "trainer" ? "trainer" : "trainee"
     setActiveTab(tab)
+    setTraineeError(null)
+    setTrainerError(null)
 
     if (tab === "trainee") {
       traineeForm.reset()
@@ -77,14 +84,30 @@ export default function RegisterPage() {
     }
   }
 
-  const onSubmitTrainee = (data: TraineeFormValues) => {
-    // TODO: implement registration handling for trainee
-    console.log("Trainee register", data)
+  const onSubmitTrainee = async (data: TraineeFormValues) => {
+    setTraineeError(null)
+    setIsPending(true)
+    try {
+      const result = await registerAction(data, "trainee")
+      if (result?.error) {
+        setTraineeError(result.error)
+      }
+    } finally {
+      setIsPending(false)
+    }
   }
 
-  const onSubmitTrainer = (data: TrainerFormValues) => {
-    // TODO: implement registration handling for trainer
-    console.log("Trainer register", data)
+  const onSubmitTrainer = async (data: TrainerFormValues) => {
+    setTrainerError(null)
+    setIsPending(true)
+    try {
+      const result = await registerAction(data, "trainer")
+      if (result?.error) {
+        setTrainerError(result.error)
+      }
+    } finally {
+      setIsPending(false)
+    }
   }
 
   //PAGE
@@ -104,7 +127,7 @@ export default function RegisterPage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="bg-dark-navy mb-6 grid w-full grid-cols-2">
+            <TabsList className="mb-6 grid w-full grid-cols-2">
               <TabsTrigger value="trainee">Podopieczny</TabsTrigger>
               <TabsTrigger value="trainer">Trener</TabsTrigger>
             </TabsList>
@@ -114,11 +137,14 @@ export default function RegisterPage() {
               <form
                 className="space-y-6"
                 onSubmit={traineeForm.handleSubmit(onSubmitTrainee)}
+                onChange={() => {
+                  if (traineeError) setTraineeError(null)
+                }}
               >
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-name">Imię *</Label>
+                    <Label htmlFor="trainee-name">Imię*</Label>
                     <Input
                       id="trainee-name"
                       placeholder="Anna"
@@ -134,7 +160,7 @@ export default function RegisterPage() {
 
                   {/*SURNAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-surname">Nazwisko *</Label>
+                    <Label htmlFor="trainee-surname">Nazwisko*</Label>
                     <Input
                       id="trainee-surname"
                       placeholder="Kowalska"
@@ -151,7 +177,7 @@ export default function RegisterPage() {
 
                 {/*EMAIL*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainee-email">Adres e-mail *</Label>
+                  <Label htmlFor="trainee-email">Adres e-mail*</Label>
                   <Input
                     id="trainee-email"
                     type="email"
@@ -169,7 +195,7 @@ export default function RegisterPage() {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
                   {/*PHONE*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-phone">Numer telefonu *</Label>
+                    <Label htmlFor="trainee-phone">Numer telefonu*</Label>
                     <Input
                       id="trainee-phone"
                       type="tel"
@@ -185,7 +211,7 @@ export default function RegisterPage() {
 
                   {/*BIRTHDATE*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainee-birthdate">Data urodzenia *</Label>
+                    <Label htmlFor="trainee-birthdate">Data urodzenia*</Label>
                     <Input
                       id="trainee-birthdate"
                       type="date"
@@ -203,7 +229,7 @@ export default function RegisterPage() {
 
                 {/*PASSWORD*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainee-password">Hasło *</Label>
+                  <Label htmlFor="trainee-password">Hasło*</Label>
                   <div className="relative">
                     <Input
                       id="trainee-password"
@@ -258,7 +284,7 @@ export default function RegisterPage() {
                     htmlFor="terms-trainee"
                     className="text-sm font-normal"
                   >
-                    Wyrażam zgodę na przetwarzanie danych. *
+                    Wyrażam zgodę na przetwarzanie danych.*
                   </Label>
                 </div>
                 {traineeForm.formState.errors.terms && (
@@ -267,8 +293,17 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full" type="submit">
-                  Utwórz konto podopiecznego
+                {traineeError && (
+                  <Alert variant="destructive" className="mx-auto">
+                    <AlertDescription>{traineeError}</AlertDescription>
+                  </Alert>
+                )}
+                <Button className="w-full" type="submit" disabled={isPending}>
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Utwórz konto podopiecznego"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -279,11 +314,14 @@ export default function RegisterPage() {
               <form
                 className="space-y-6"
                 onSubmit={trainerForm.handleSubmit(onSubmitTrainer)}
+                onChange={() => {
+                  if (trainerError) setTrainerError(null)
+                }}
               >
                 <div className="grid grid-cols-2 gap-4">
                   {/*NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainer-name">Imię *</Label>
+                    <Label htmlFor="trainer-name">Imię*</Label>
                     <Input
                       id="trainer-name"
                       placeholder="Anna"
@@ -299,7 +337,7 @@ export default function RegisterPage() {
 
                   {/*SURANME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="trainer-surname">Nazwisko *</Label>
+                    <Label htmlFor="trainer-surname">Nazwisko*</Label>
                     <Input
                       id="trainer-surname"
                       placeholder="Kowalska"
@@ -316,7 +354,7 @@ export default function RegisterPage() {
 
                 {/*EMAIL*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-email">Adres e-mail *</Label>
+                  <Label htmlFor="trainer-email">Adres e-mail*</Label>
                   <Input
                     id="trainer-email"
                     type="email"
@@ -333,7 +371,7 @@ export default function RegisterPage() {
 
                 {/*PHONE*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-phone">Numer telefonu *</Label>
+                  <Label htmlFor="trainer-phone">Numer telefonu*</Label>
                   <Input
                     id="trainer-phone"
                     type="tel"
@@ -349,7 +387,7 @@ export default function RegisterPage() {
 
                 {/*PASSWORD*/}
                 <div className="space-y-1.5">
-                  <Label htmlFor="trainer-password">Hasło *</Label>
+                  <Label htmlFor="trainer-password">Hasło*</Label>
                   <div className="relative">
                     <Input
                       id="trainer-password"
@@ -394,7 +432,7 @@ export default function RegisterPage() {
 
                   {/*WORKPLACE NAME*/}
                   <div className="space-y-1.5">
-                    <Label htmlFor="workplace-name">Nazwa miejsca *</Label>
+                    <Label htmlFor="workplace-name">Nazwa miejsca*</Label>
                     <Input
                       id="workplace-name"
                       className="border-gold"
@@ -413,7 +451,7 @@ export default function RegisterPage() {
 
                   {/*STREET*/}
                   <div className="space-y-1">
-                    <Label htmlFor="street">Ulica *</Label>
+                    <Label htmlFor="street">Ulica*</Label>
                     <Input
                       id="street"
                       className="border-gold"
@@ -430,7 +468,7 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
                     {/*BUILDING NUMBER*/}
                     <div className="space-y-1">
-                      <Label htmlFor="building-number">Nr bud. *</Label>
+                      <Label htmlFor="building-number">Nr bud.*</Label>
                       <Input
                         id="building-number"
                         className="border-gold"
@@ -466,7 +504,7 @@ export default function RegisterPage() {
 
                   {/*CITY*/}
                   <div className="space-y-1">
-                    <Label htmlFor="city">Miasto *</Label>
+                    <Label htmlFor="city">Miasto*</Label>
                     <Input
                       id="city"
                       className="border-gold"
@@ -500,7 +538,7 @@ export default function RegisterPage() {
                     )}
                   />
                   <Label htmlFor="terms" className="text-sm font-normal">
-                    Wyrażam zgodę na przetwarzanie danych. *
+                    Wyrażam zgodę na przetwarzanie danych.*
                   </Label>
                 </div>
                 {trainerForm.formState.errors.terms && (
@@ -509,8 +547,18 @@ export default function RegisterPage() {
                   </p>
                 )}
 
-                <Button className="w-full" type="submit">
-                  Utwórz konto trenera
+                {trainerError && (
+                  <Alert variant="destructive" className="mx-auto">
+                    <AlertDescription>{trainerError}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button className="w-full" type="submit" disabled={isPending}>
+                  {isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Utwórz konto trenera"
+                  )}
                 </Button>
               </form>
             </TabsContent>
