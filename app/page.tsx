@@ -10,18 +10,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
-import { loginAction } from "@/actions/auth" 
+import { loginAction } from "@/actions/auth"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [isPending, setIsPending] = useState(false) 
+  const [isPending, setIsPending] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  
+
   const searchParams = useSearchParams()
   const router = useRouter()
   const isRegistered = searchParams.get("registered") === "true"
   const hasShownToast = useRef(false)
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -68,7 +67,11 @@ export default function LoginPage() {
           <CardTitle className="font-michroma text-2xl">Logowanie</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} onChange={() => setLoginError(null)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            onChange={() => setLoginError(null)}
+            className="space-y-6"
+          >
             {/* EMAIL*/}
             <div className="space-y-1.5">
               <Label htmlFor="email">Adres e-mail</Label>
@@ -113,10 +116,10 @@ export default function LoginPage() {
             </div>
 
             {loginError && (
-                  <Alert variant="destructive" className="mx-auto">
-                    <AlertDescription>{loginError}</AlertDescription>
-                  </Alert>
-                )}
+              <Alert variant="destructive" className="mx-auto">
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            )}
 
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? (
@@ -140,4 +143,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

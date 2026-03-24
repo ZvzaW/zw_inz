@@ -21,8 +21,8 @@ export default function Navbar() {
   const handleLogout = async () => {
     const result = await logoutAction()
 
-    if(result?.error){
-      toast.error(result?.error);
+    if (result?.error) {
+      toast.error(result?.error)
     }
   }
 
@@ -197,7 +197,7 @@ export default function Navbar() {
               >
                 <User size={20} /> Profil
               </Link>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="bg-dirty-navy flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-700 py-3 text-zinc-300 hover:text-red-400"
               >

@@ -84,32 +84,31 @@ export default function RegisterPage() {
     }
   }
 
-const onSubmitTrainee = async (data: TraineeFormValues) => {
-  setTraineeError(null)
-  setIsPending(true)
-  try{
-    const result = await registerAction(data, "trainee")
-    if (result?.error) {
-      setTraineeError(result.error)
+  const onSubmitTrainee = async (data: TraineeFormValues) => {
+    setTraineeError(null)
+    setIsPending(true)
+    try {
+      const result = await registerAction(data, "trainee")
+      if (result?.error) {
+        setTraineeError(result.error)
+      }
+    } finally {
+      setIsPending(false)
     }
-  }finally{
-    setIsPending(false);
   }
-}
 
-const onSubmitTrainer = async (data: TrainerFormValues) => {
-  setTrainerError(null)
-  setIsPending(true)
-  try{
-    const result = await registerAction(data, "trainer")
-    if (result?.error) {
-      setTrainerError(result.error)
+  const onSubmitTrainer = async (data: TrainerFormValues) => {
+    setTrainerError(null)
+    setIsPending(true)
+    try {
+      const result = await registerAction(data, "trainer")
+      if (result?.error) {
+        setTrainerError(result.error)
+      }
+    } finally {
+      setIsPending(false)
     }
-  }finally{
-    setIsPending(false);
   }
-  
-}
 
   //PAGE
   return (
@@ -300,10 +299,10 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                   </Alert>
                 )}
                 <Button className="w-full" type="submit" disabled={isPending}>
-                {isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  "Utwórz konto podopiecznego"
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Utwórz konto podopiecznego"
                   )}
                 </Button>
               </form>
@@ -555,10 +554,10 @@ const onSubmitTrainer = async (data: TrainerFormValues) => {
                 )}
 
                 <Button className="w-full" type="submit" disabled={isPending}>
-                {isPending ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  "Utwórz konto trenera"
+                  {isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Utwórz konto trenera"
                   )}
                 </Button>
               </form>
