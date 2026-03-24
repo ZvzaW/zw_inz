@@ -12,11 +12,13 @@ function DropdownMenu({
 }
 
 function DropdownMenuTrigger({
+  className, // Dodaj obsługę className
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   return (
     <DropdownMenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
+      className={cn("outline-none focus:outline-none", className)} // Dodaj te klasy
       {...props}
     />
   )
@@ -55,7 +57,7 @@ function DropdownMenuItem({
     <DropdownMenuPrimitive.Item
       data-slot="dropdown-menu-item"
       className={cn(
-        "focus:bg-dirty-navy relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "focus:bg-dirty-navy relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         inset && "pl-8",
         className
       )}
