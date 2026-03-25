@@ -20,7 +20,10 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const isRegistered = searchParams.get("registered") === "true"
-  const hasShownToast = useRef(false)
+  const isUnauthorized = searchParams.get("unauthorized") === "true" 
+  const isCallBack = searchParams.get("callbackUrl")
+  const hasShownRegisteredToast = useRef(false)
+  const hasShownUnauthorizedToast = useRef(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -47,18 +50,34 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    if (isRegistered && !hasShownToast.current) {
-      hasShownToast.current = true
+    if (isRegistered && !hasShownRegisteredToast.current) {
+      hasShownRegisteredToast.current = true
       toast.success("Konto utworzone pomyślnie!", {
         description: "Możesz się teraz zalogować.",
         duration: 4000,
       })
 
-      const newParams = new URLSearchParams(searchParams.toString())
-      newParams.delete("registered")
-      router.replace(`/?${newParams.toString()}`, { scroll: false })
+      router.replace(`/`, { scroll: false })
     }
   }, [isRegistered, searchParams, router])
+
+
+  useEffect(() => {
+    if ((isUnauthorized || isCallBack) && !hasShownUnauthorizedToast.current) {
+      hasShownUnauthorizedToast.current = true;
+
+      setTimeout(() => {
+        toast.warning("Sesja wygasła!", {
+          description: "Zaloguj się ponownie.",
+          duration: 4000,
+        });
+  
+        if (isUnauthorized) {
+          router.replace('/', { scroll: false });
+        }
+      }, 100); 
+    }
+  }, [isUnauthorized, isCallBack, searchParams, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

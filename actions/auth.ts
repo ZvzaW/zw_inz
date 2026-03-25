@@ -98,6 +98,7 @@ export async function logoutAction() {
   const session = await auth()
   const tokenToDelete = (session as any)?.refreshToken
 
+  console.log(tokenToDelete)
   try {
     if (tokenToDelete) {
       await prisma.refresh_token.delete({
