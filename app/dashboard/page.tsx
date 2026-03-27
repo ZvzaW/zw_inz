@@ -1,48 +1,74 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Users, MessageSquare, ChevronRight, Bell, MessageCircle, Calendar, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import { getNotificationsAction } from "@/actions/notifications"
 import TrainerStats from "@/components/pages/trainer-stats"
 import TraineeStats from "@/components/pages/trainee-stats"
+import { getNotificationsAction, getUnreadCountAction } from "@/actions/notifications"
+import { useEffect, useState, useRef } from "react"
 
 
 export default function DashboardPage() {
   const { data: session } = useSession()
   const role = session?.user?.role
- 
-
-  const [error, setError] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">("notifications")
   const [notificationsGrouped, setNotificationsGrouped] = useState<Record<string, any[]>>({})
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
-  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">("notifications")
+  const [unreadCount, setUnreadCount] = useState(0)
+  const unreadCountRef = useRef<number | null>(null)
 
   useEffect(() => {
+    fetchUnreadCount(true)
     loadNotifications(0)
+    
+    const intervalId = setInterval(() => {
+      fetchUnreadCount(false)
+    }, 100000);
+
+    return () => clearInterval(intervalId);
   }, [])
 
-  
-  const loadNotifications = async (pageNum: number) => {
-    if (pageNum === 0) setIsLoading(true)
-    else setIsFetchingMore(true)
+  const fetchUnreadCount = async (isInitialLoad: boolean) => {
+    const response = await getUnreadCountAction()
     
-    setError(null)
+    if (response.error) {
+      if(response.error === "401"){
+        window.location.href = "/?unauthorized=true"
+      return 
+      } 
+    }
+
+    const newCount = response.count
+
+    if (!isInitialLoad && unreadCountRef.current !== null && newCount !== unreadCountRef.current) {
+      loadNotifications(0, true) 
+    }
+
+    unreadCountRef.current = newCount
+    setUnreadCount(newCount)
+  }
+
+
+  const loadNotifications = async (pageNum: number, isBackgroundRefresh = false) => {
+    if (pageNum === 0 && !isBackgroundRefresh) setIsLoading(true)
+    else if (!isBackgroundRefresh) setIsFetchingMore(true)
+    
+    if (!isBackgroundRefresh) setError(null)
   
     try {
-      const response= await getNotificationsAction(pageNum)
+      const response = await getNotificationsAction(pageNum)
 
-      console.log(response.error)
-      console.log(response)
       if(response.error){
-        setError(response.error)
+        if(response.error === "401") window.location.href = "/?unauthorized=true"
+        else if (!isBackgroundRefresh) setError(response.error)
         return
       }
 
@@ -54,7 +80,12 @@ export default function DashboardPage() {
           if (newState[label]) {
             const existingIds = new Set(newState[label].map((n: any) => n.id))
             const uniqueNewItems = items.filter((item: any) => !existingIds.has(item.id))
-            newState[label] = [...newState[label], ...uniqueNewItems]
+            
+            if (pageNum === 0) {
+              newState[label] = [...uniqueNewItems, ...newState[label]]
+            } else {
+              newState[label] = [...newState[label], ...uniqueNewItems]
+            }
           } else {
             newState[label] = items
           }
@@ -62,21 +93,20 @@ export default function DashboardPage() {
         return newState
       })
       
-      setHasMore(moreAvailable)
-      setPage(pageNum)
-    }catch(error: any){
-      if(error.message === "UNAUTHORIZED"){
-        window.location.href = "/?unauthorized=true"
-      }else{
-        setError("Wystąpił nieoczekiwany błąd połączenia. Spróbuj odświeżyć stronę.")
+      if (!isBackgroundRefresh) {
+        setHasMore(moreAvailable)
+        setPage(pageNum)
       }
+      
+    } catch(error: any){
+      if (!isBackgroundRefresh) setError("Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę.")
     } finally {
       setIsLoading(false)
       setIsFetchingMore(false)
     }
   }
 
-  const unreadCount = Object.values(notificationsGrouped).flat().filter((n: any) => !n.is_read).length 
+
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

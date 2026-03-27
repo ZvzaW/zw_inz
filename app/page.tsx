@@ -20,7 +20,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const isRegistered = searchParams.get("registered") === "true"
-  const isUnauthorized = searchParams.get("unauthorized") === "true" 
+  const isUnauthorized = searchParams.get("unauthorized") === "true"
   const isCallBack = searchParams.get("callbackUrl")
   const hasShownRegisteredToast = useRef(false)
   const hasShownUnauthorizedToast = useRef(false)
@@ -54,10 +54,8 @@ export default function LoginPage() {
       hasShownRegisteredToast.current = true
       toast.success("Konto utworzone pomyślnie!", {
         description: "Możesz się teraz zalogować.",
-        duration: 4000,
+        duration: 5000,
       })
-
-      router.replace(`/`, { scroll: false })
     }
   }, [isRegistered, searchParams, router])
 
@@ -69,15 +67,13 @@ export default function LoginPage() {
       setTimeout(() => {
         toast.warning("Sesja wygasła!", {
           description: "Zaloguj się ponownie.",
-          duration: 4000,
+          duration: 5000,
         });
   
-        if (isUnauthorized) {
-          router.replace('/', { scroll: false });
-        }
       }, 100); 
     }
   }, [isUnauthorized, isCallBack, searchParams, router]);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

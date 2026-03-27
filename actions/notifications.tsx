@@ -6,10 +6,14 @@ import { auth } from "@/auth"
 
 export async function getNotificationsAction(page: number = 0) {
   const session = await auth(); 
-  if (!session) throw new Error("UNAUTHORIZED")
+  if (!session) return { 
+    grouped: {}, 
+    hasMore: false,
+    error: "401"
+  }
     
   try {
-    const limit = 1
+    const limit = 15
     const notifications = await prisma.notification.findMany({
       where: { user_id: session.user.id },
       take: limit + 1, 
@@ -23,7 +27,7 @@ export async function getNotificationsAction(page: number = 0) {
   
     return { grouped, hasMore }
     
-  } catch(error) {
+  } catch(error: any) {
     return { 
       grouped: {}, 
       hasMore: false,
@@ -31,6 +35,29 @@ export async function getNotificationsAction(page: number = 0) {
     }
   } 
 }
+
+
+export async function getUnreadCountAction() {
+  const session = await auth(); 
+  if (!session) return { count: 0, error: "401" }
+    
+  try {
+    const count = await prisma.notification.count({
+      where: { 
+        user_id: session.user.id,
+        is_read: false
+      }
+    })
+
+    return { count, error: null }
+  } catch(error: any) {
+    return { 
+      count: 0, 
+      error: "Nie udało się pobrać danych. Spróbuj odświeżyć stronę" 
+    }
+  } 
+}
+
 
 function groupNotificationsByDate(notifications: any[]) {
   const today = new Date()
