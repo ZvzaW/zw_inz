@@ -3,61 +3,60 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-
 export async function getNotificationsAction(page: number = 0) {
-  const session = await auth(); 
-  if (!session) return { 
-    grouped: {}, 
-    hasMore: false,
-    error: "401"
-  }
-    
+  const session = await auth()
+  if (!session)
+    return {
+      grouped: {},
+      hasMore: false,
+      error: "401",
+    }
+
   try {
     const limit = 15
     const notifications = await prisma.notification.findMany({
       where: { user_id: session.user.id },
-      take: limit + 1, 
+      take: limit + 1,
       skip: page * limit,
-      orderBy: { created_at: 'desc' }, 
+      orderBy: { created_at: "desc" },
     })
 
     const hasMore = notifications.length > limit
-    const notificationsToDisplay = hasMore ? notifications.slice(0, limit) : notifications
+    const notificationsToDisplay = hasMore
+      ? notifications.slice(0, limit)
+      : notifications
     const grouped = groupNotificationsByDate(notificationsToDisplay)
-  
+
     return { grouped, hasMore }
-    
-  } catch(error: any) {
-    return { 
-      grouped: {}, 
+  } catch (error: any) {
+    return {
+      grouped: {},
       hasMore: false,
-      error: "Nie udało się pobrać danych. Spróbuj odświeżyć stronę"
+      error: "Nie udało się pobrać danych. Spróbuj odświeżyć stronę",
     }
-  } 
+  }
 }
 
-
 export async function getUnreadCountAction() {
-  const session = await auth(); 
+  const session = await auth()
   if (!session) return { count: 0, error: "401" }
-    
+
   try {
     const count = await prisma.notification.count({
-      where: { 
+      where: {
         user_id: session.user.id,
-        is_read: false
-      }
+        is_read: false,
+      },
     })
 
     return { count, error: null }
-  } catch(error: any) {
-    return { 
-      count: 0, 
-      error: "Nie udało się pobrać danych. Spróbuj odświeżyć stronę" 
+  } catch (error: any) {
+    return {
+      count: 0,
+      error: "Nie udało się pobrać danych. Spróbuj odświeżyć stronę",
     }
-  } 
+  }
 }
-
 
 function groupNotificationsByDate(notifications: any[]) {
   const today = new Date()
@@ -78,7 +77,9 @@ function groupNotificationsByDate(notifications: any[]) {
     } else if (isYesterday) {
       label = "WCZORAJ"
     } else {
-      const dayName = date.toLocaleDateString("pl-PL", { weekday: "short" }).replace('.', '') 
+      const dayName = date
+        .toLocaleDateString("pl-PL", { weekday: "short" })
+        .replace(".", "")
       label = `${dayName}, ${formatDate(date)}`
     }
 
@@ -90,5 +91,9 @@ function groupNotificationsByDate(notifications: any[]) {
 }
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" })
+  return date.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
 }

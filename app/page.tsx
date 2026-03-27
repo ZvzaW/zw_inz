@@ -59,21 +59,18 @@ export default function LoginPage() {
     }
   }, [isRegistered, searchParams, router])
 
-
   useEffect(() => {
     if ((isUnauthorized || isCallBack) && !hasShownUnauthorizedToast.current) {
-      hasShownUnauthorizedToast.current = true;
+      hasShownUnauthorizedToast.current = true
 
       setTimeout(() => {
         toast.warning("Sesja wygasła!", {
           description: "Zaloguj się ponownie.",
           duration: 5000,
-        });
-  
-      }, 100); 
+        })
+      }, 100)
     }
-  }, [isUnauthorized, isCallBack, searchParams, router]);
-
+  }, [isUnauthorized, isCallBack, searchParams, router])
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

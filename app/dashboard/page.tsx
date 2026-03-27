@@ -1,23 +1,37 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { Users, MessageSquare, ChevronRight, Bell, MessageCircle, Calendar, Loader2 } from "lucide-react"
+import {
+  Users,
+  MessageSquare,
+  ChevronRight,
+  Bell,
+  MessageCircle,
+  Calendar,
+  Loader2,
+} from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import TrainerStats from "@/components/pages/trainer-stats"
 import TraineeStats from "@/components/pages/trainee-stats"
-import { getNotificationsAction, getUnreadCountAction } from "@/actions/notifications"
+import {
+  getNotificationsAction,
+  getUnreadCountAction,
+} from "@/actions/notifications"
 import { useEffect, useState, useRef } from "react"
-
 
 export default function DashboardPage() {
   const { data: session } = useSession()
   const role = session?.user?.role
-  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">("notifications")
-  const [notificationsGrouped, setNotificationsGrouped] = useState<Record<string, any[]>>({})
-  const [error, setError] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">(
+    "notifications"
+  )
+  const [notificationsGrouped, setNotificationsGrouped] = useState<
+    Record<string, any[]>
+  >({})
+  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const [page, setPage] = useState(0)
@@ -28,92 +42,105 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchUnreadCount(true)
     loadNotifications(0)
-    
+
     const intervalId = setInterval(() => {
       fetchUnreadCount(false)
-    }, 100000);
+    }, 100000)
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId)
   }, [])
 
   const fetchUnreadCount = async (isInitialLoad: boolean) => {
     const response = await getUnreadCountAction()
-    
+
     if (response.error) {
-      if(response.error === "401"){
+      if (response.error === "401") {
         window.location.href = "/?unauthorized=true"
-      return 
-      } 
+        return
+      }
     }
 
     const newCount = response.count
 
-    if (!isInitialLoad && unreadCountRef.current !== null && newCount !== unreadCountRef.current) {
-      loadNotifications(0, true) 
+    if (
+      !isInitialLoad &&
+      unreadCountRef.current !== null &&
+      newCount !== unreadCountRef.current
+    ) {
+      loadNotifications(0, true)
     }
 
     unreadCountRef.current = newCount
     setUnreadCount(newCount)
   }
 
-
-  const loadNotifications = async (pageNum: number, isBackgroundRefresh = false) => {
+  const loadNotifications = async (
+    pageNum: number,
+    isBackgroundRefresh = false
+  ) => {
     if (pageNum === 0 && !isBackgroundRefresh) setIsLoading(true)
     else if (!isBackgroundRefresh) setIsFetchingMore(true)
-    
+
     if (!isBackgroundRefresh) setError(null)
-  
+
     try {
       const response = await getNotificationsAction(pageNum)
 
-      if(response.error){
-        if(response.error === "401") window.location.href = "/?unauthorized=true"
+      if (response.error) {
+        if (response.error === "401")
+          window.location.href = "/?unauthorized=true"
         else if (!isBackgroundRefresh) setError(response.error)
         return
       }
 
       const { grouped, hasMore: moreAvailable } = response
-      
-      setNotificationsGrouped(prev => {
+
+      setNotificationsGrouped((prev) => {
         const newState = { ...prev }
-        Object.entries(grouped as Record<string, any[]>).forEach(([label, items]) => {
-          if (newState[label]) {
-            const existingIds = new Set(newState[label].map((n: any) => n.id))
-            const uniqueNewItems = items.filter((item: any) => !existingIds.has(item.id))
-            
-            if (pageNum === 0) {
-              newState[label] = [...uniqueNewItems, ...newState[label]]
+        Object.entries(grouped as Record<string, any[]>).forEach(
+          ([label, items]) => {
+            if (newState[label]) {
+              const existingIds = new Set(newState[label].map((n: any) => n.id))
+              const uniqueNewItems = items.filter(
+                (item: any) => !existingIds.has(item.id)
+              )
+
+              if (pageNum === 0) {
+                newState[label] = [...uniqueNewItems, ...newState[label]]
+              } else {
+                newState[label] = [...newState[label], ...uniqueNewItems]
+              }
             } else {
-              newState[label] = [...newState[label], ...uniqueNewItems]
+              newState[label] = items
             }
-          } else {
-            newState[label] = items
           }
-        })
+        )
         return newState
       })
-      
+
       if (!isBackgroundRefresh) {
         setHasMore(moreAvailable)
         setPage(pageNum)
       }
-      
-    } catch(error: any){
-      if (!isBackgroundRefresh) setError("Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę.")
+    } catch (error: any) {
+      if (!isBackgroundRefresh)
+        setError("Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę.")
     } finally {
       setIsLoading(false)
       setIsFetchingMore(false)
     }
   }
 
-
-
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case "request": return <Users size={16} />
-      case "comment": return <MessageSquare size={16} />
-      case "message": return <MessageCircle size={16} />
-      default: return <Bell size={16} />
+      case "request":
+        return <Users size={16} />
+      case "comment":
+        return <MessageSquare size={16} />
+      case "message":
+        return <MessageCircle size={16} />
+      default:
+        return <Bell size={16} />
     }
   }
 
@@ -129,12 +156,11 @@ export default function DashboardPage() {
       <Card className="h-[707px] overflow-hidden">
         <CardContent className="h-full pr-1">
           <div className="custom-scrollbar h-full space-y-6 overflow-y-auto pr-5">
-            
-          {error && (
-                  <Alert variant="destructive" className="mx-auto">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+            {error && (
+              <Alert variant="destructive" className="mx-auto">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
             {isLoading ? (
               <Loader2 className="mx-auto mt-10 animate-spin" />
@@ -144,7 +170,9 @@ export default function DashboardPage() {
                   <div key={label} className="space-y-6">
                     <div className="flex items-center gap-4">
                       <Separator className="flex-1" />
-                      <span className="text-gold text-xs font-medium uppercase">{label}</span>
+                      <span className="text-gold text-xs font-medium uppercase">
+                        {label}
+                      </span>
                       <Separator className="flex-1" />
                     </div>
                     <div className="space-y-3">
@@ -152,16 +180,24 @@ export default function DashboardPage() {
                         <button
                           key={notif.id}
                           className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left transition-all ${
-                            !notif.is_read ? "border-baby-blue border-2" : "border-zinc-800 border" 
+                            !notif.is_read
+                              ? "border-baby-blue border-2"
+                              : "border border-zinc-800"
                           }`}
                         >
                           <div className="space-y-3 text-sm">
-                            <div className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}>
+                            <div
+                              className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                            >
                               {notif.title} {getNotificationIcon(notif.type)}
                             </div>
-                            <p className="text-zinc-400 leading-relaxed">{notif.message}</p>
+                            <p className="leading-relaxed text-zinc-400">
+                              {notif.message}
+                            </p>
                           </div>
-                          <ChevronRight className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`} />
+                          <ChevronRight
+                            className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                          />
                         </button>
                       ))}
                     </div>
@@ -170,12 +206,16 @@ export default function DashboardPage() {
 
                 {hasMore && !error && (
                   <div className="flex justify-center pb-4">
-                    <button 
+                    <button
                       onClick={() => loadNotifications(page + 1)}
                       disabled={isFetchingMore}
-                      className="px-4 py-3 text-baby-blue text-sm hover:bg-dark-navy/70 bg-dirty-navy/70 rounded-lg"
+                      className="text-baby-blue hover:bg-dark-navy/70 bg-dirty-navy/70 rounded-lg px-4 py-3 text-sm"
                     >
-                        {isFetchingMore ? <Loader2 className="animate-spin"/> : "Załaduj więcej"}
+                      {isFetchingMore ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        "Załaduj więcej"
+                      )}
                     </button>
                   </div>
                 )}
@@ -189,11 +229,15 @@ export default function DashboardPage() {
 
   const renderStats = () => (
     <section>
-      <h2 className="font-michroma mb-5 hidden justify-center text-2xl text-white lg:flex">Statystyki</h2>
+      <h2 className="font-michroma mb-5 hidden justify-center text-2xl text-white lg:flex">
+        Statystyki
+      </h2>
       <Card className="h-[707px]">
         <CardContent>
           <div className="bg-dirty-blue flex items-center justify-between rounded-xl py-4">
-            <span className="pr-2 pl-5 text-sm text-zinc-300 uppercase">Kolejny trening</span>
+            <span className="pr-2 pl-5 text-sm text-zinc-300 uppercase">
+              Kolejny trening
+            </span>
             <div className="bg-dirty-navy/60 text-baby-blue mr-4 flex items-center gap-2 rounded-lg px-3 py-3">
               <Calendar size={16} />
               <span className="mt-1 whitespace-nowrap">20.20.2026, 18:00</span>
@@ -208,14 +252,23 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center">
       <div className="block lg:hidden">
-        <Tabs value={mobileTab} onValueChange={(v) => setMobileTab(v as any)} className="w-full">
+        <Tabs
+          value={mobileTab}
+          onValueChange={(v) => setMobileTab(v as any)}
+          className="w-full"
+        >
           <TabsList className="bg-dark-navy font-michroma border-baby-blue/40 z-1 mb-8 grid w-full grid-cols-2 border">
             <TabsTrigger value="notifications" className="text-xs">
-              Powiadomienia <span>{unreadCount > 99 ? "99+" : unreadCount}</span>
+              Powiadomienia{" "}
+              <span>{unreadCount > 99 ? "99+" : unreadCount}</span>
             </TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs">Statystyki</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs">
+              Statystyki
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="notifications">{renderNotifications()}</TabsContent>
+          <TabsContent value="notifications">
+            {renderNotifications()}
+          </TabsContent>
           <TabsContent value="stats">{renderStats()}</TabsContent>
         </Tabs>
       </div>
@@ -226,30 +279,6 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // "use client"
 
