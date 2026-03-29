@@ -14,23 +14,23 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import { Notification } from "@/lib/types"
 import TrainerStats from "@/components/pages/trainer-stats"
 import TraineeStats from "@/components/pages/trainee-stats"
 import {
   getNotificationsAction,
   getUnreadCountAction,
+  markAsReadAction
 } from "@/actions/notifications"
 import { useEffect, useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { toast, Toaster } from "sonner"
 
 export default function DashboardPage() {
   const { data: session } = useSession()
   const role = session?.user?.role
-  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">(
-    "notifications"
-  )
-  const [notificationsGrouped, setNotificationsGrouped] = useState<
-    Record<string, any[]>
-  >({})
+  const [mobileTab, setMobileTab] = useState<"notifications" | "stats">("notifications")
+  const [notificationsGrouped, setNotificationsGrouped] = useState<Record<string, Notification[]>>({})
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const [hasMore, setHasMore] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
   const unreadCountRef = useRef<number | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     fetchUnreadCount(true)
@@ -97,12 +98,12 @@ export default function DashboardPage() {
 
       setNotificationsGrouped((prev) => {
         const newState = { ...prev }
-        Object.entries(grouped as Record<string, any[]>).forEach(
+        Object.entries(grouped as Record<string, Notification[]>).forEach(
           ([label, items]) => {
             if (newState[label]) {
-              const existingIds = new Set(newState[label].map((n: any) => n.id))
+              const existingIds = new Set(newState[label].map((n: Notification) => n.id))
               const uniqueNewItems = items.filter(
-                (item: any) => !existingIds.has(item.id)
+                (item: Notification) => !existingIds.has(item.id)
               )
 
               if (pageNum === 0) {
@@ -144,6 +145,37 @@ export default function DashboardPage() {
     }
   }
 
+
+  const handleNotificationClick = async (notifId: string, isRead: boolean, url: string | null) => {
+    if (isRead) {
+      if (url) router.push(url);
+      return;
+    }
+
+    // setNotificationsGrouped(prev => {
+    //   const newState = { ...prev };
+    //   Object.keys(newState).forEach(label => {
+    //     newState[label] = newState[label].map(notif => 
+    //       notif.id === notifId ? { ...notif, is_read: true } : notif
+    //     );
+    //   });
+    //   return newState;
+    // });
+
+    // setUnreadCount(prev => Math.max(0, prev - 1));
+
+    const response = await markAsReadAction(notifId);
+
+    if (response.error && response.error !== "401") {
+      toast.error(response.error)
+      return
+    }
+
+    if (url) {
+      router.push(url);
+    }
+  }
+
   const renderNotifications = () => (
     <section>
       <div className="mb-5 hidden items-center justify-center gap-3 lg:flex">
@@ -176,27 +208,28 @@ export default function DashboardPage() {
                       <Separator className="flex-1" />
                     </div>
                     <div className="space-y-3">
-                      {items.map((notif: any) => (
+                      {items.map((notification: Notification) => (
                         <button
-                          key={notif.id}
+                          key={notification.id}
                           className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left transition-all ${
-                            !notif.is_read
+                            !notification.is_read
                               ? "border-baby-blue border-2"
-                              : "border border-zinc-800"
+                              : "border border-dirty-navy/60"
                           }`}
+                          onClick={() => handleNotificationClick(notification.id, notification.is_read, notification.redirect_url)}
                         >
                           <div className="space-y-3 text-sm">
                             <div
-                              className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                              className={`flex gap-2 font-semibold ${!notification.is_read ? "text-baby-blue" : "text-zinc-300"}`}
                             >
-                              {notif.title} {getNotificationIcon(notif.type)}
+                              {notification.title} {getNotificationIcon(notification.type)}
                             </div>
                             <p className="leading-relaxed text-zinc-400">
-                              {notif.message}
+                              {notification.message}
                             </p>
                           </div>
                           <ChevronRight
-                            className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                            className={`shrink-0 ${!notification.is_read ? "text-baby-blue" : "text-zinc-300"}`}
                           />
                         </button>
                       ))}
@@ -279,285 +312,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-// "use client"
-
-// import {
-//   Users,
-//   MessageSquare,
-//   ChevronRight,
-//   Bell,
-//   MessageCircle,
-//   Calendar,
-// } from "lucide-react"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import TrainerStats from "@/components/pages/trainer-stats"
-// import TraineeStats from "@/components/pages/trainee-stats"
-// import { Separator } from "@/components/ui/separator"
-// import { useEffect, useState } from "react"
-// import { getNotificationsAction } from "@/actions/notifications"
-
-// interface Notification {
-//   id: string
-//   user_id: string
-//   title: string
-//   message: string
-//   redirect_url: string | null
-//   type: "request" | "comment" | "message" | "other"
-//   isRead: boolean
-//   created_at: string
-// }
-
-// const today = new Date()
-// const yesterday = new Date(today)
-// yesterday.setDate(yesterday.getDate() - 1)
-
-// //MOCK DATA
-// const initialNotifications: Notification[] = [
-//   {
-//     id: "uuid-1",
-//     user_id: "user-1",
-//     title: "Nowa prośba o współpracę",
-//     message: "Adam Kowalski chce nawiązać współpracę. Sprawdź listę.",
-//     redirect_url: "/dashboard/clients/requests",
-//     type: "request",
-//     isRead: false,
-//     created_at: today.toISOString(),
-//   },
-//   {
-//     id: "uuid-2",
-//     user_id: "user-2",
-//     title: "Nowy komentarz",
-//     message: "Anna zostawiła nowy komentarz pod planem.",
-//     redirect_url: "/dashboard/plans/123",
-//     type: "comment",
-//     isRead: false,
-//     created_at: today.toISOString(),
-//   },
-//   {
-//     id: "uuid-3",
-//     user_id: "user-3",
-//     title: "Nowa wiadomość",
-//     message: "Anna Kowalska wysłała nową wiadomość.",
-//     redirect_url: null,
-//     type: "message",
-//     isRead: true,
-//     created_at: yesterday.toISOString(),
-//   },
-//   {
-//     id: "uuid-4",
-//     user_id: "user-3",
-//     title: "Nowa wiadomość",
-//     message: "Anna Kowalska wysłała nową wiadomość.",
-//     redirect_url: null,
-//     type: "message",
-//     isRead: true,
-//     created_at: "04/03/2026",
-//   },
-//   {
-//     id: "uuid-5",
-//     user_id: "user-3",
-//     title: "Nowa wiadomość",
-//     message: "Anna Kowalska wysłała nową wiadomość.",
-//     redirect_url: null,
-//     type: "message",
-//     isRead: true,
-//     created_at: "04/03/2026",
-//   },
-//   {
-//     id: "uuid-6",
-//     user_id: "user-3",
-//     title: "Nowa wiadomość",
-//     message: "Anna Kowalska wysłała nową wiadomość.",
-//     redirect_url: null,
-//     type: "message",
-//     isRead: true,
-//     created_at: "06/03/2026",
-//   },
-// ]
-
-// export default function DashboardPage() {
-//   const role: "trainer" | "trainee" = "trainer" //TO-DO: change role recognition
-
-//   const [mobileTab, setMobileTab] = useState<"notifications" | "stats">(
-//     "notifications"
-//   )
-
-//   const [notifications, setNotifications] =
-//     useState<Notification[]>(initialNotifications)
-
-//   const getNotificationIcon = (type: string) => {
-//     switch (type) {
-//       case "request":
-//         return <Users size={16} />
-//       case "comment":
-//         return <MessageSquare size={16} />
-//       case "message":
-//         return <MessageCircle size={16} />
-//       default:
-//         return <Bell size={16} />
-//     }
-//   }
-
-//   //TO-DO: Implement redirecting to new url and updating isRead status
-//   const handleNotificationClick = (id: string, url: string | null) => {
-//     setNotifications((prev) =>
-//       prev.map((notif) =>
-//         notif.id === id ? { ...notif, isRead: true } : notif
-//       )
-//     )
-//     if (url) console.log(`Przekierowuję do: ${url}`)
-//   }
-
-//   const formatDateGroup = (dateString: string) => {
-//     const date = new Date(dateString)
-//     const dateFormatted = date.toLocaleDateString("pl-PL", {
-//       day: "2-digit",
-//       month: "2-digit",
-//       year: "numeric",
-//     })
-//     if (date.toDateString() === today.toDateString())
-//       return `Dzisiaj, ${dateFormatted}`
-//     if (date.toDateString() === yesterday.toDateString())
-//       return `Wczoraj, ${dateFormatted}`
-//     return dateFormatted
-//   }
-
-//   const groupedNotifications = notifications.reduce(
-//     (acc, notif) => {
-//       const groupKey = formatDateGroup(notif.created_at)
-//       if (!acc[groupKey]) acc[groupKey] = []
-//       acc[groupKey].push(notif)
-//       return acc
-//     },
-//     {} as Record<string, Notification[]>
-//   )
-
-//   const unreadCount = notifications.filter((n) => !n.isRead).length
-
-//   // POWIADOMIENIA
-//   const renderNotifications = () => (
-//     <section>
-//       <div className="mb-5 hidden items-center justify-center gap-3 lg:flex">
-//         <h2 className="font-michroma text-2xl">Powiadomienia</h2>
-//         <span className="border-baby-blue text-baby-blue font-michroma flex h-8 min-w-8 items-center justify-center rounded-full border-2 px-2 text-sm font-bold">
-//           {unreadCount > 99 ? "99+" : unreadCount}
-//         </span>
-//       </div>
-
-//       <Card className="h-[707px] overflow-hidden">
-//         <CardContent className="h-full pr-1">
-//           <div className="custom-scrollbar h-full space-y-6 overflow-y-auto pr-5">
-//             {Object.entries(groupedNotifications).map(([dateLabel, notifs]) => (
-//               <div key={dateLabel} className="space-y-6">
-//                 <div className="flex items-center gap-4">
-//                   <Separator className="flex-1" />
-//                   <span className="text-gold text-sm">{dateLabel}</span>
-//                   <Separator className="flex-1" />
-//                 </div>
-
-//                 <div className="space-y-3">
-//                   {notifs.map((notif) => (
-//                     <button
-//                       key={notif.id}
-//                       onClick={() =>
-//                         handleNotificationClick(notif.id, notif.redirect_url)
-//                       }
-//                       className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left ${
-//                         !notif.isRead
-//                           ? "border-baby-blue border-2"
-//                           : "border-zinc-800"
-//                       }`}
-//                     >
-//                       <div className="space-y-3 text-sm">
-//                         <div
-//                           className={`flex gap-2 font-semibold ${!notif.isRead ? "text-baby-blue" : "text-zinc-300"}`}
-//                         >
-//                           {notif.title} {getNotificationIcon(notif.type)}
-//                         </div>
-//                         <p className="text-zinc-400">{notif.message}</p>
-//                       </div>
-//                       <ChevronRight
-//                         className={`shrink-0 ${!notif.isRead ? "text-baby-blue" : "text-zinc-300"}`}
-//                       />
-//                     </button>
-//                   ))}
-//                 </div>
-//               </div>
-//             ))}
-//             {notifications.length === 0 && (
-//               <p className="text-md py-4 text-center text-zinc-400">
-//                 Brak powiadomień
-//               </p>
-//             )}
-//           </div>
-//         </CardContent>
-//       </Card>
-//     </section>
-//   )
-
-//   //STATYSTYKI
-//   const renderStats = () => (
-//     <section>
-//       <h2 className="font-michroma mb-5 hidden justify-center text-2xl text-white lg:flex">
-//         Statystyki
-//       </h2>
-//       <Card className="h-[707px]">
-//         <CardContent>
-//           {/* Kolejny trening */}
-//           <div className="bg-dirty-blue flex items-center justify-between rounded-xl py-4">
-//             <span className="pr-2 pl-5 text-sm text-zinc-300 uppercase">
-//               Kolejny trening
-//             </span>
-//             <div className="bg-dirty-navy/60 text-baby-blue mr-4 flex items-center gap-2 rounded-lg px-3 py-3">
-//               <Calendar size={16} />
-//               <span className="mt-1 whitespace-nowrap">20.20.2026, 18:00</span>
-//             </div>
-//           </div>
-
-//           {/* Statystyki dla roli*/}
-//           {role === "trainer" ? <TrainerStats /> : <TraineeStats />}
-//         </CardContent>
-//       </Card>
-//     </section>
-//   )
-
-//   //RENDER
-//   return (
-//     <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center">
-//       {/*MOBILE*/}
-//       <div className="block lg:hidden">
-//         <Tabs
-//           value={mobileTab}
-//           onValueChange={(v) => setMobileTab(v as "notifications" | "stats")}
-//           className="w-full"
-//         >
-//           <TabsList className="bg-dark-navy font-michroma border-baby-blue/40 z-1 mb-8 grid w-full grid-cols-2 border">
-//             <TabsTrigger value="notifications" className="text-xs">
-//               Powiadomienia{" "}
-//               <span>{unreadCount > 99 ? "99+" : unreadCount}</span>
-//             </TabsTrigger>
-//             <TabsTrigger value="stats" className="text-xs">
-//               Statystyki
-//             </TabsTrigger>
-//           </TabsList>
-
-//           <TabsContent value="notifications">
-//             {mobileTab === "notifications" ? renderNotifications() : null}
-//           </TabsContent>
-
-//           <TabsContent value="stats">
-//             {mobileTab === "stats" ? renderStats() : null}
-//           </TabsContent>
-//         </Tabs>
-//       </div>
-
-//       {/*DESKTOP*/}
-//       <div className="hidden gap-12 lg:grid lg:grid-cols-2">
-//         {renderNotifications()}
-//         {renderStats()}
-//       </div>
-//     </div>
-//   )
-// }

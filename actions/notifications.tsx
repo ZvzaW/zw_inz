@@ -58,6 +58,29 @@ export async function getUnreadCountAction() {
   }
 }
 
+
+export async function markAsReadAction(id: string) {
+  const session = await auth(); 
+  if (!session) return { error: "401" }
+    
+  try {
+    await prisma.notification.update({
+      where: { 
+        id: id,
+        user_id: session.user.id
+      },
+      data: { is_read: true }
+    });
+
+    return { error: null }
+  } catch(error: any) {
+    return {  
+      error: "Coś poszło nie tak przy odczytywaniu powiadomienia." 
+    }
+  } 
+}
+
+
 function groupNotificationsByDate(notifications: any[]) {
   const today = new Date()
   const yesterday = new Date(today)
