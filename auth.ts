@@ -93,6 +93,7 @@ async function refreshAccessToken(token: any) {
       throw new Error("RefreshTokenExpired")
     }
 
+    console.log("REFRESH TOKEN")
     return {
       ...token,
       accessToken: crypto.randomBytes(20).toString("hex"),

@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import useSWR from "swr"
+import useSWRInfinite from "swr/infinite"
 import {
   Users,
   MessageSquare,
@@ -8,101 +11,154 @@ import {
   Bell,
   MessageCircle,
   Calendar,
+  Loader2,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Separator } from "@/components/ui/separator"
 import TrainerStats from "@/components/pages/trainer-stats"
 import TraineeStats from "@/components/pages/trainee-stats"
-import { Separator } from "@/components/ui/separator"
+import {
+  getNotificationsAction,
+  getUnreadCountAction,
+  markAsReadAction,
+} from "@/actions/notifications"
+import { Notification } from "@/lib/types"
+import { useRouter } from "next/navigation"
 
-interface Notification {
-  id: string
-  user_id: string
-  title: string
-  message: string
-  redirect_url: string | null
-  type: "request" | "comment" | "message" | "other"
-  isRead: boolean
-  created_at: string
+const countFetcher = async () => {
+  const res = await getUnreadCountAction()
+  if (res.error === "401") window.location.href = "/?unauthorized=true"
+  if (res.error) throw new Error(res.error)
+  return res.count || 0
 }
 
-const today = new Date()
-const yesterday = new Date(today)
-yesterday.setDate(yesterday.getDate() - 1)
-
-//MOCK DATA
-const initialNotifications: Notification[] = [
-  {
-    id: "uuid-1",
-    user_id: "user-1",
-    title: "Nowa prośba o współpracę",
-    message: "Adam Kowalski chce nawiązać współpracę. Sprawdź listę.",
-    redirect_url: "/dashboard/clients/requests",
-    type: "request",
-    isRead: false,
-    created_at: today.toISOString(),
-  },
-  {
-    id: "uuid-2",
-    user_id: "user-2",
-    title: "Nowy komentarz",
-    message: "Anna zostawiła nowy komentarz pod planem.",
-    redirect_url: "/dashboard/plans/123",
-    type: "comment",
-    isRead: false,
-    created_at: today.toISOString(),
-  },
-  {
-    id: "uuid-3",
-    user_id: "user-3",
-    title: "Nowa wiadomość",
-    message: "Anna Kowalska wysłała nową wiadomość.",
-    redirect_url: null,
-    type: "message",
-    isRead: true,
-    created_at: yesterday.toISOString(),
-  },
-  {
-    id: "uuid-4",
-    user_id: "user-3",
-    title: "Nowa wiadomość",
-    message: "Anna Kowalska wysłała nową wiadomość.",
-    redirect_url: null,
-    type: "message",
-    isRead: true,
-    created_at: "04/03/2026",
-  },
-  {
-    id: "uuid-5",
-    user_id: "user-3",
-    title: "Nowa wiadomość",
-    message: "Anna Kowalska wysłała nową wiadomość.",
-    redirect_url: null,
-    type: "message",
-    isRead: true,
-    created_at: "04/03/2026",
-  },
-  {
-    id: "uuid-6",
-    user_id: "user-3",
-    title: "Nowa wiadomość",
-    message: "Anna Kowalska wysłała nową wiadomość.",
-    redirect_url: null,
-    type: "message",
-    isRead: true,
-    created_at: "06/03/2026",
-  },
-]
+const notificationFetcher = async (page: number) => {
+  const res = await getNotificationsAction(page)
+  if (res.error === "401") window.location.href = "/?unauthorized=true"
+  if (res.error) throw new Error(res.error)
+  return res
+}
 
 export default function DashboardPage() {
-  const role: "trainer" | "trainee" = "trainer" //TO-DO: change role recognition
-
+  const { data: session } = useSession()
+  const role = session?.user?.role
   const [mobileTab, setMobileTab] = useState<"notifications" | "stats">(
     "notifications"
   )
+  const router = useRouter()
 
-  const [notifications, setNotifications] =
-    useState<Notification[]>(initialNotifications)
+  // SWR - LICZNIK
+  const { data: unreadCount = 0, mutate: mutateCount } = useSWR(
+    "unread-count",
+    countFetcher,
+    { refreshInterval: 60000 }
+  )
+
+  // SWR - POWIADOMIENIA Z PAGINACJĄ
+  const getKey = (pageIndex: number, previousPageData: any) => {
+    if (previousPageData && !previousPageData.hasMore) return null
+    return `notifications-page-${pageIndex}`
+  }
+
+  const {
+    data: pagesData,
+    error,
+    size,
+    setSize,
+    isValidating,
+    mutate: mutateList,
+  } = useSWRInfinite(
+    getKey,
+    (key) => {
+      const page = parseInt(key.split("-").pop() || "0")
+      return notificationFetcher(page)
+    },
+    {
+      revalidateFirstPage: false,
+      revalidateOnFocus: false,
+      persistSize: true,
+    }
+  )
+
+  // REAKCJA NA ZMIANĘ LICZNIKA
+  const prevCountRef = useRef(unreadCount)
+  useEffect(() => {
+    if (unreadCount !== prevCountRef.current) {
+      mutateList()
+      prevCountRef.current = unreadCount
+    }
+  }, [unreadCount, mutateList])
+
+  // GRUPOWANIE POWIADOMIEN PO LABELACH (DATA)
+  const notificationsGrouped = useMemo(() => {
+    if (!pagesData) {
+      return {}
+    }
+
+    const combined: Record<string, Notification[]> = {}
+
+    pagesData.forEach((page) => {
+      if (!page || !page.grouped) return
+      Object.entries(page.grouped as Record<string, Notification[]>).forEach(
+        ([label, items]) => {
+          if (!combined[label]) combined[label] = []
+
+          const existingIds = new Set(combined[label].map((n) => n.id))
+          const uniqueItems = items.filter((n) => !existingIds.has(n.id))
+          combined[label].push(...uniqueItems)
+        }
+      )
+    })
+    return combined
+  }, [pagesData])
+
+  const isLoadingInitialData = !pagesData && !error
+  const isLoadingMore =
+    isLoadingInitialData ||
+    (size > 0 && pagesData && typeof pagesData[size - 1] === "undefined")
+  const hasMore = pagesData?.[pagesData.length - 1]?.hasMore ?? true
+
+  const handleNotificationClick = async (
+    notifId: string,
+    isRead: boolean,
+    url: string | null
+  ) => {
+    if (isRead) {
+      if (url) {
+        router.push(url)
+      }
+      return
+    }
+
+    mutateCount(Math.max(0, unreadCount - 1), false)
+
+    if (pagesData) {
+      const newData = pagesData.map((page) => ({
+        ...page,
+        grouped: Object.fromEntries(
+          Object.entries(page.grouped as Record<string, Notification[]>).map(
+            ([label, items]) => [
+              label,
+              items.map((notif) =>
+                notif.id === notifId ? { ...notif, is_read: true } : notif
+              ),
+            ]
+          )
+        ),
+      }))
+      mutateList(newData, false)
+    }
+
+    await markAsReadAction(notifId)
+
+    setTimeout(() => {
+      if (url) {
+        router.push(url)
+      }
+    }, 100)
+  }
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -117,43 +173,6 @@ export default function DashboardPage() {
     }
   }
 
-  //TO-DO: Implement redirecting to new url and updating isRead status
-  const handleNotificationClick = (id: string, url: string | null) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
-    )
-    if (url) console.log(`Przekierowuję do: ${url}`)
-  }
-
-  const formatDateGroup = (dateString: string) => {
-    const date = new Date(dateString)
-    const dateFormatted = date.toLocaleDateString("pl-PL", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    if (date.toDateString() === today.toDateString())
-      return `Dzisiaj, ${dateFormatted}`
-    if (date.toDateString() === yesterday.toDateString())
-      return `Wczoraj, ${dateFormatted}`
-    return dateFormatted
-  }
-
-  const groupedNotifications = notifications.reduce(
-    (acc, notif) => {
-      const groupKey = formatDateGroup(notif.created_at)
-      if (!acc[groupKey]) acc[groupKey] = []
-      acc[groupKey].push(notif)
-      return acc
-    },
-    {} as Record<string, Notification[]>
-  )
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length
-
-  // POWIADOMIENIA
   const renderNotifications = () => (
     <section>
       <div className="mb-5 hidden items-center justify-center gap-3 lg:flex">
@@ -165,48 +184,75 @@ export default function DashboardPage() {
 
       <Card className="h-[707px] overflow-hidden">
         <CardContent className="h-full pr-1">
-          <div className="custom-scrollbar h-full space-y-6 overflow-y-auto pr-5">
-            {Object.entries(groupedNotifications).map(([dateLabel, notifs]) => (
-              <div key={dateLabel} className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Separator className="flex-1" />
-                  <span className="text-gold text-sm">{dateLabel}</span>
-                  <Separator className="flex-1" />
-                </div>
-
-                <div className="space-y-3">
-                  {notifs.map((notif) => (
-                    <button
-                      key={notif.id}
-                      onClick={() =>
-                        handleNotificationClick(notif.id, notif.redirect_url)
-                      }
-                      className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left ${
-                        !notif.isRead
-                          ? "border-baby-blue border-2"
-                          : "border-zinc-800"
-                      }`}
-                    >
-                      <div className="space-y-3 text-sm">
-                        <div
-                          className={`flex gap-2 font-semibold ${!notif.isRead ? "text-baby-blue" : "text-zinc-300"}`}
+          {error && (
+            <Alert variant="destructive" className="mx-auto mt-[-6px] mb-6">
+              <AlertDescription>{error.message}</AlertDescription>
+            </Alert>
+          )}
+          <div className="custom-scrollbar h-full space-y-6 overflow-y-auto pr-5 pb-10">
+            {isLoadingInitialData ? (
+              <Loader2 className="text-baby-blue mx-auto mt-10 animate-spin" />
+            ) : (
+              <>
+                {Object.entries(notificationsGrouped).map(([label, items]) => (
+                  <div key={label} className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <Separator className="flex-1" />
+                      <span className="text-gold text-xs font-medium uppercase">
+                        {label}
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    <div className="space-y-3">
+                      {items.map((notif: Notification) => (
+                        <button
+                          key={notif.id}
+                          onClick={() =>
+                            handleNotificationClick(
+                              notif.id,
+                              notif.is_read,
+                              notif.redirect_url
+                            )
+                          }
+                          className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left transition-all ${
+                            !notif.is_read ? "border-baby-blue border-2" : ""
+                          }`}
                         >
-                          {notif.title} {getNotificationIcon(notif.type)}
-                        </div>
-                        <p className="text-zinc-400">{notif.message}</p>
-                      </div>
-                      <ChevronRight
-                        className={`shrink-0 ${!notif.isRead ? "text-baby-blue" : "text-zinc-300"}`}
-                      />
+                          <div className="space-y-3 text-sm">
+                            <div
+                              className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                            >
+                              {notif.title} {getNotificationIcon(notif.type)}
+                            </div>
+                            <p className="leading-relaxed text-zinc-400">
+                              {notif.message}
+                            </p>
+                          </div>
+                          <ChevronRight
+                            className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {hasMore && !error && (
+                  <div className="flex justify-center pb-4">
+                    <button
+                      onClick={() => setSize(size + 1)}
+                      disabled={isValidating}
+                      className="text-baby-blue hover:bg-dark-navy/70 bg-dirty-navy/70 flex min-w-[140px] items-center justify-center rounded-lg px-4 py-3 text-sm"
+                    >
+                      {isLoadingMore ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        "Załaduj więcej"
+                      )}
                     </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {notifications.length === 0 && (
-              <p className="text-md py-4 text-center text-zinc-400">
-                Brak powiadomień
-              </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </CardContent>
@@ -214,7 +260,6 @@ export default function DashboardPage() {
     </section>
   )
 
-  //STATYSTYKI
   const renderStats = () => (
     <section>
       <h2 className="font-michroma mb-5 hidden justify-center text-2xl text-white lg:flex">
@@ -222,7 +267,6 @@ export default function DashboardPage() {
       </h2>
       <Card className="h-[707px]">
         <CardContent>
-          {/* Kolejny trening */}
           <div className="bg-dirty-blue flex items-center justify-between rounded-xl py-4">
             <span className="pr-2 pl-5 text-sm text-zinc-300 uppercase">
               Kolejny trening
@@ -232,22 +276,18 @@ export default function DashboardPage() {
               <span className="mt-1 whitespace-nowrap">20.20.2026, 18:00</span>
             </div>
           </div>
-
-          {/* Statystyki dla roli*/}
           {role === "trainer" ? <TrainerStats /> : <TraineeStats />}
         </CardContent>
       </Card>
     </section>
   )
 
-  //RENDER
   return (
     <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center">
-      {/*MOBILE*/}
       <div className="block lg:hidden">
         <Tabs
           value={mobileTab}
-          onValueChange={(v) => setMobileTab(v as "notifications" | "stats")}
+          onValueChange={(v) => setMobileTab(v as any)}
           className="w-full"
         >
           <TabsList className="bg-dark-navy font-michroma border-baby-blue/40 z-1 mb-8 grid w-full grid-cols-2 border">
@@ -259,18 +299,12 @@ export default function DashboardPage() {
               Statystyki
             </TabsTrigger>
           </TabsList>
-
           <TabsContent value="notifications">
-            {mobileTab === "notifications" ? renderNotifications() : null}
+            {renderNotifications()}
           </TabsContent>
-
-          <TabsContent value="stats">
-            {mobileTab === "stats" ? renderStats() : null}
-          </TabsContent>
+          <TabsContent value="stats">{renderStats()}</TabsContent>
         </Tabs>
       </div>
-
-      {/*DESKTOP*/}
       <div className="hidden gap-12 lg:grid lg:grid-cols-2">
         {renderNotifications()}
         {renderStats()}

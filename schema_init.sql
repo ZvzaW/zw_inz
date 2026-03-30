@@ -142,6 +142,7 @@ CREATE TABLE notification (
     redirect_url text NULL,
     type varchar(30) NOT NULL,
     is_read boolean NOT NULL DEFAULT false, 
+    created_at timestamp  NOT NULL DEFAULT now(),
     CONSTRAINT notification_pk PRIMARY KEY (id)
 );
 
