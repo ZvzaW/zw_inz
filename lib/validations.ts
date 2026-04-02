@@ -8,13 +8,13 @@ export const passwordSchema = z
     message: "Hasło musi zawierać małe i wielkie litery oraz cyfry",
   })
 
-const isAtLeast13 = (dateString: string) => {
+const isAtLeast15 = (dateString: string) => {
   const birth = new Date(dateString)
   if (isNaN(birth.getTime())) return false
 
   const today = new Date()
   const thirteenYearsAgo = new Date(
-    today.getFullYear() - 13,
+    today.getFullYear() - 15,
     today.getMonth(),
     today.getDate()
   )
@@ -38,8 +38,8 @@ export const traineeSchema = z.object({
   birthdate: z
     .string()
     .min(1, "Data urodzenia jest wymagana")
-    .refine((val) => isAtLeast13(val), {
-      message: "Musisz mieć co najmniej 13 lat",
+    .refine((val) => isAtLeast15(val), {
+      message: "Musisz mieć co najmniej 15 lat",
     }),
   password: passwordSchema,
   terms: z.boolean().refine((val) => val === true, {
@@ -48,6 +48,24 @@ export const traineeSchema = z.object({
 })
 
 export type TraineeFormValues = z.infer<typeof traineeSchema>
+
+export const traineePersonalDataSchema = z.object({
+  name: z.string().trim().min(1, "Imię jest wymagane"),
+  surname: z.string().trim().min(1, "Nazwisko jest wymagane"),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Numer telefonu jest wymagany")
+    .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu"),
+  birthdate: z
+    .string()
+    .min(1, "Data urodzenia jest wymagana")
+    .refine((val) => isAtLeast15(val), {
+      message: "Musisz mieć co najmniej 15 lat",
+    }),
+})
+
+export type TraineePersonalDataValues = z.infer<typeof traineePersonalDataSchema>
 
 export const trainerSchema = z.object({
   name: z.string().trim().min(1, "Imię jest wymagane"),

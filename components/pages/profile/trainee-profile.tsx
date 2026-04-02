@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"
 import { formatDate } from "@/lib/utils"
-import { ClipboardList, Pencil, Settings } from "lucide-react";
+import { ClipboardList, Settings } from "lucide-react";
+import EditTraineeDataDialog from "@/components/dialogs/trainee/edit-data"
 
 interface TraineeProfileProps {
   baseData: {
@@ -63,7 +64,7 @@ export default function TraineeProfile({ baseData, specificData }: TraineeProfil
       <div className="w-full max-w-[250px] flex flex-col gap-4">
         <Button variant="secondary"> <ClipboardList/> Ankieta startowa</Button>
         <Button variant="secondary"> <Settings/> Konto</Button>
-        <Button variant="secondary"> <Pencil/> Dane </Button>
+        <EditTraineeDataDialog baseData={baseData} specificData={specificData} />
       </div>
     </div>
 
