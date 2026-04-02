@@ -17,8 +17,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import TrainerStats from "@/components/pages/trainer-stats"
-import TraineeStats from "@/components/pages/trainee-stats"
+import TrainerStats from "@/components/pages/statistics/trainer-stats"
+import TraineeStats from "@/components/pages/statistics/trainee-stats"
 import {
   getNotificationsAction,
   getUnreadCountAction,
@@ -283,7 +283,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center">
+    <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center p-3">
       <div className="block lg:hidden">
         <Tabs
           value={mobileTab}

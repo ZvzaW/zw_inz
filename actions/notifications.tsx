@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
+import { formatDate } from "@/lib/utils"
 
 export async function getNotificationsAction(page: number = 0) {
   const session = await auth()
@@ -111,10 +112,3 @@ function groupNotificationsByDate(notifications: any[]) {
   return groups
 }
 
-function formatDate(date: Date) {
-  return date.toLocaleDateString("pl-PL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  })
-}

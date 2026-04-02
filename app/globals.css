@@ -112,9 +112,8 @@
   }
 }
 
-/* STYLOWANIE PASKÓW PRZEWIJANIA */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px; /* Wąski, dyskretny pasek */
+  width: 8px; 
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
