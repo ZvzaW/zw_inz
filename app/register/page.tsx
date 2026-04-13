@@ -24,7 +24,7 @@ import {
   type TraineeFormValues,
   type TrainerFormValues,
 } from "@/lib/validations"
-import { registerAction } from "@/actions/auth"
+import { registerAction } from "@/actions/authorization"
 
 const PASSWORD_MAX_LENGTH = 30
 

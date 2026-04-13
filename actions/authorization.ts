@@ -111,3 +111,23 @@ export async function logoutAction() {
 
   await signOut({ redirectTo: "/" })
 }
+
+
+export async function logoutAllDevicesAction() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/?unauthorized=true")
+  }
+
+  try {
+    await prisma.refresh_token.deleteMany({
+      where: { 
+        user_id: session.user.id 
+      },
+    })
+  } catch (error) {
+    return { error: "Nie udało się wylogować ze wszystkich urządzeń. Spróbuj ponownie." }
+  }
+
+  await signOut({ redirectTo: "/" })
+}

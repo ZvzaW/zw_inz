@@ -3,14 +3,12 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { formatDate } from "@/lib/utils"
+import { redirect } from "next/navigation"
 
 export async function getNotificationsAction(page: number = 0) {
   const session = await auth()
-  if (!session)
-    return {
-      grouped: {},
-      hasMore: false,
-      error: "401",
+  if (!session?.user?.id){
+      redirect("/?unauthorized=true")
     }
 
   try {
@@ -40,7 +38,9 @@ export async function getNotificationsAction(page: number = 0) {
 
 export async function getUnreadCountAction() {
   const session = await auth()
-  if (!session) return { count: 0, error: "401" }
+  if (!session?.user?.id){
+    redirect("/?unauthorized=true")
+  }
 
   try {
     const count = await prisma.notification.count({
@@ -61,7 +61,9 @@ export async function getUnreadCountAction() {
 
 export async function markAsReadAction(id: string) {
   const session = await auth()
-  if (!session) return { error: "401" }
+  if (!session?.user?.id){
+    redirect("/?unauthorized=true")
+  }
 
   try {
     await prisma.notification.update({

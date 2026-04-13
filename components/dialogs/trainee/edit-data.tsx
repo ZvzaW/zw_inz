@@ -107,14 +107,10 @@ export default function EditTraineeDataDialog({
               startTransition(async () => {
                 const res = await updateTraineeDataAction(values)
                 if (res?.error) {
-                  if(res.error === "401"){
-                    window.location.href = "/?unauthorized=true"
-                  }else{
                     toast.error(res.error)
+                    return
                   }
-                  return
-                }
-
+                  
                 toast.success("Zapisano dane!")
                 setOpen(false)
               })

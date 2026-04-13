@@ -5,10 +5,13 @@ import { prisma } from "@/lib/prisma"
 import { traineePersonalDataSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 export async function updateTraineeDataAction(input: unknown) {
   const session = await auth()
-  if (!session?.user?.id) return { error: "401" as const }
+  if (!session?.user?.id) {
+    redirect("/?unauthorized=true")
+  }
 
   const validated = traineePersonalDataSchema.safeParse(input)
   if (!validated.success) return { error: "Nieprawidłowe dane wejściowe." as const }

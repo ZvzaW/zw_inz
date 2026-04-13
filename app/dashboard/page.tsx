@@ -29,14 +29,12 @@ import { useRouter } from "next/navigation"
 
 const countFetcher = async () => {
   const res = await getUnreadCountAction()
-  if (res.error === "401") window.location.href = "/?unauthorized=true"
   if (res.error) throw new Error(res.error)
   return res.count || 0
 }
 
 const notificationFetcher = async (page: number) => {
   const res = await getNotificationsAction(page)
-  if (res.error === "401") window.location.href = "/?unauthorized=true"
   if (res.error) throw new Error(res.error)
   return res
 }
