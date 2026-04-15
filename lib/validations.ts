@@ -67,6 +67,24 @@ export const traineePersonalDataSchema = z.object({
 
 export type TraineePersonalDataValues = z.infer<typeof traineePersonalDataSchema>
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Podaj obecne hasło"),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string().min(1, "Potwierdź nowe hasło"),
+    logoutOtherDevices: z.boolean(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Hasła nie są identyczne",
+    path: ["confirmNewPassword"],
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "Nowe hasło musi być inne od obecnego",
+    path: ["newPassword"],
+  })
+
+export type ChangePasswordValues = z.input<typeof changePasswordSchema>
+
 export const trainerSchema = z.object({
   name: z.string().trim().min(1, "Imię jest wymagane"),
   surname: z.string().trim().min(1, "Nazwisko jest wymagane"),

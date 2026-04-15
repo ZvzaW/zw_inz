@@ -101,7 +101,7 @@ export async function logoutAction() {
   console.log(tokenToDelete)
   try {
     if (tokenToDelete) {
-      await prisma.refresh_token.delete({
+      await prisma.refresh_token.deleteMany({
         where: { token: tokenToDelete },
       })
     }
