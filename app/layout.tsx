@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Mina, Michroma } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/components/providers/session-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import "./globals.css"
 
 const mina = Mina({
@@ -31,8 +32,12 @@ export default function RootLayout({
       <body
         className={`${mina.className} ${michroma.variable} overflow-x-hidden antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
-
+        
+        <AuthProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </AuthProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

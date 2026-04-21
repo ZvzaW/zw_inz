@@ -12,8 +12,8 @@ model coaching_request {
   trainee_id String   @db.Uuid
   message    String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
-  trainee    trainee  @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "coaching_request_client")
-  trainer    trainer  @relation(fields: [trainer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "coaching_request_trainer")
+  trainee    trainee  @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "coaching_request_client")
+  trainer    trainer  @relation(fields: [trainer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "coaching_request_trainer")
 
   @@id([trainer_id, trainee_id], map: "coaching_request_pk")
 }
@@ -23,8 +23,8 @@ model cooperation {
   trainee_id   String     @db.Uuid
   created_at   DateTime   @default(now()) @db.Timestamptz(6)
   trainer_note String?
-  trainee      trainee    @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cooperation_trainee")
-  trainer      trainer    @relation(fields: [trainer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cooperation_trainer")
+  trainee      trainee    @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cooperation_trainee")
+  trainer      trainer    @relation(fields: [trainer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cooperation_trainer")
   training     training[]
 
   @@id([trainer_id, trainee_id], map: "cooperation_pk")
@@ -36,7 +36,7 @@ model exercise {
   name            String            @db.VarChar(255)
   video_url       String?
   body_part       String            @db.VarChar(100)
-  trainer         trainer           @relation(fields: [trainer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "exercise_trainer")
+  trainer         trainer           @relation(fields: [trainer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "exercise_trainer")
   exercise_set    exercise_set[]
   personal_record personal_record[]
 }
@@ -49,7 +49,7 @@ model exercise_set {
   reps_count   Int
   weight       Decimal? @db.Decimal(5, 2)
   order_index  Int
-  exercise     exercise @relation(fields: [exercise_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "set_exercise")
+  exercise     exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "set_exercise")
   section      section  @relation(fields: [section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "set_section")
 }
 
@@ -70,8 +70,8 @@ model opinion {
   trainer_id String  @db.Uuid
   rate       Int
   comment    String?
-  trainee    trainee @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "opinion_trainee")
-  trainer    trainer @relation(fields: [trainer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "opinion_trainer")
+  trainee    trainee @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "opinion_trainee")
+  trainer    trainer @relation(fields: [trainer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "opinion_trainer")
 
   @@id([trainee_id, trainer_id], map: "opinion_pk")
 }
@@ -82,8 +82,8 @@ model personal_record {
   exercise_id String   @db.Uuid
   weight      Decimal  @db.Decimal(5, 2)
   date        DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
-  exercise    exercise @relation(fields: [exercise_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "record_exercise")
-  trainee     trainee  @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "record_trainee")
+  exercise    exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "record_exercise")
+  trainee     trainee  @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "record_trainee")
 }
 
 model section {
@@ -101,8 +101,8 @@ model survey_answer {
   trainee_id      String          @db.Uuid
   question_id     String          @db.Uuid
   answer          String
-  survey_question survey_question @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "answer_question")
-  trainee         trainee         @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "answer_trainee")
+  survey_question survey_question @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "answer_question")
+  trainee         trainee         @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "answer_trainee")
 
   @@id([trainee_id, question_id], map: "survey_answer_pk")
 }
@@ -149,8 +149,8 @@ model training {
   start_time       DateTime           @db.Time(6)
   duration         Decimal            @db.Decimal(3, 1)
   cooperation      cooperation        @relation(fields: [trainer_id, trainee_id], references: [trainer_id, trainee_id], onDelete: NoAction, onUpdate: NoAction, map: "training_cooperation")
-  section          section?           @relation(fields: [section_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "training_section")
-  workplace        workplace          @relation(fields: [workplace_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "training_workplace")
+  section          section?           @relation(fields: [section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "training_section")
+  workplace        workplace          @relation(fields: [workplace_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "training_workplace")
   training_comment training_comment[]
 }
 
@@ -160,7 +160,7 @@ model training_comment {
   training_id String   @db.Uuid
   content     String
   training    training @relation(fields: [training_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comment_training")
-  user        user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comment_user")
+  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comment_user")
 }
 
 model user {
@@ -194,8 +194,8 @@ model workout_plan {
   description String?
   trainee_id  String    @db.Uuid
   section     section[]
-  trainee     trainee   @relation(fields: [trainee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "workout_plan_client")
-  trainer     trainer   @relation(fields: [trainer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "workout_plan_trainer")
+  trainee     trainee   @relation(fields: [trainee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workout_plan_client")
+  trainer     trainer   @relation(fields: [trainer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "workout_plan_trainer")
 }
 
 model workplace {

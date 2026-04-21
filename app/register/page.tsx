@@ -19,10 +19,10 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  traineeSchema,
-  trainerSchema,
-  type TraineeFormValues,
-  type TrainerFormValues,
+  registerTraineeSchema,
+  registerTrainerSchema,
+  type RegisterTraineeFormValues,
+  type RegisterTrainerFormValues,
 } from "@/lib/validations"
 import { registerAction } from "@/actions/authorization"
 
@@ -35,8 +35,8 @@ export default function RegisterPage() {
   const [traineeError, setTraineeError] = useState<string | null>(null)
   const [trainerError, setTrainerError] = useState<string | null>(null)
 
-  const traineeForm = useForm<TraineeFormValues>({
-    resolver: zodResolver(traineeSchema),
+  const traineeForm = useForm<RegisterTraineeFormValues>({
+    resolver: zodResolver(registerTraineeSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -49,8 +49,8 @@ export default function RegisterPage() {
     },
   })
 
-  const trainerForm = useForm<TrainerFormValues>({
-    resolver: zodResolver(trainerSchema),
+  const trainerForm = useForm<RegisterTrainerFormValues>({
+    resolver: zodResolver(registerTrainerSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -84,7 +84,7 @@ export default function RegisterPage() {
     }
   }
 
-  const onSubmitTrainee = async (data: TraineeFormValues) => {
+  const onSubmitTrainee = async (data: RegisterTraineeFormValues) => {
     setTraineeError(null)
     setIsPending(true)
     try {
@@ -97,7 +97,7 @@ export default function RegisterPage() {
     }
   }
 
-  const onSubmitTrainer = async (data: TrainerFormValues) => {
+  const onSubmitTrainer = async (data: RegisterTrainerFormValues) => {
     setTrainerError(null)
     setIsPending(true)
     try {

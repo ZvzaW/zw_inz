@@ -14,8 +14,12 @@ export default async function ProfilePage() {
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      trainer: true,
-      trainee: true,
+      trainee: true, 
+      trainer: {
+        include: {
+          workplace: true, 
+        }
+      },
     }
   })
 
@@ -34,7 +38,6 @@ export default async function ProfilePage() {
 
   return (
     <div className="w-full p-3 flex flex-col justify-center min-h-[calc(100vh-15rem)]">
-
       {user.role === "trainer" && user.trainer ? (
         <TrainerProfile baseData={baseUserData} specificData={user.trainer} />
       ) : user.role === "trainee" && user.trainee ? (

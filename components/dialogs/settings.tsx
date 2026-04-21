@@ -4,7 +4,8 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Settings, LogOut, Key, ShieldAlert, ChevronLeft, Loader2 } from "lucide-react"
+import { Settings, LogOut, Key, ShieldAlert, ChevronLeft, Loader2, Pencil } from "lucide-react"
+import { toDateInputValue } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -31,18 +32,43 @@ import {
 import {
   changePasswordSchema,
   type ChangePasswordValues,
+  traineePersonalDataSchema,
+  type TraineePersonalDataValues,
+  trainerPersonalDataSchema,
 } from "@/lib/validations"
 import { changePasswordAction } from "@/actions/settings"
 import { logoutAllDevicesAction } from "@/actions/authorization"
+import { updatePersonalDataAction } from "@/actions/profile"
+import { z } from "zod"
 
-type ViewState = "main" | "logout" | "password" | "delete"
+export interface SettingsDialogProps {
+  baseData: {
+    id: string
+    name: string
+    surname: string
+    email: string
+    phone: string
+    role: string 
+  }
+  specificData: {
+    birthdate?: Date 
+    work_description?: string | null 
+    price_per_training?: number | null 
+    is_public?: boolean 
+  }
+}
 
-export default function SettingsDialog() {
+type ViewState = "main" | "logout" | "password" | "delete" | "edit-data"
+
+export default function SettingsDialog({ baseData, specificData }: SettingsDialogProps) {
   const [open, setOpen] = React.useState(false)
   const [view, setView] = React.useState<ViewState>("main")
   const [deleteInput, setDeleteInput] = React.useState("")
   const [isPending, startTransition] = React.useTransition()
   const [isPasswordPending, startPasswordTransition] = React.useTransition()
+  const [isEditPending, startEditTransition] = React.useTransition()
+  const isTrainer = baseData.role === "trainer"
+  const formSchema = isTrainer ? trainerPersonalDataSchema : traineePersonalDataSchema
 
   const passwordForm = useForm<ChangePasswordValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -74,6 +100,39 @@ export default function SettingsDialog() {
   }, [view])
 
 
+
+  const getEditDefaultValues = () => {
+    const base = {
+      name: baseData.name ?? "",
+      surname: baseData.surname ?? "",
+      phone: baseData.phone ?? "",
+    }
+
+    if (!isTrainer) {
+      return {
+        ...base,
+        birthdate: specificData?.birthdate 
+          ? toDateInputValue(new Date(specificData.birthdate))
+          : "",
+      }
+    }
+    
+    return base
+  }
+
+  const editForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: getEditDefaultValues(),
+    mode: "onChange",
+  })
+
+  React.useEffect(() => {
+    if (view === "edit-data") {
+      editForm.reset(getEditDefaultValues())
+    }
+  }, [view, editForm, baseData, specificData])
+
+
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
     if (!isOpen) {
@@ -101,6 +160,7 @@ export default function SettingsDialog() {
             </DialogHeader>
 
             <div className="flex flex-col gap-5">
+            
               <Button
                 variant="secondary"
                 className="justify-start h-12 text-md border-2 border-baby-blue"
@@ -108,6 +168,15 @@ export default function SettingsDialog() {
               >
                 <LogOut className="ml-1 mr-1" />
                 Wyloguj ze wszystkich urządzeń
+              </Button>
+
+              <Button
+                variant="secondary"
+                className="justify-start h-12 text-md border-2 border-baby-blue"
+                onClick={() => setView("edit-data")}
+              >
+                <Pencil className="ml-1 mr-1" />
+                Edytuj dane
               </Button>
 
               <Button
@@ -177,7 +246,7 @@ export default function SettingsDialog() {
               <Button variant="ghost" onClick={() => setView("main")}>
                 <ChevronLeft className="size-5" />
               </Button>
-              <DialogTitle>Zmień hasło</DialogTitle>
+              <DialogTitle>Zmiana hasła</DialogTitle>
             </DialogHeader>
 
             <Form {...passwordForm}>
@@ -314,6 +383,7 @@ export default function SettingsDialog() {
           </div>
         )}
 
+        {/*TO-DO: dodac logike usuwania konta */}
         {/* --------------- USUŃ KONTO --------------- */}
         {view === "delete" && (
           <div className="animate-in slide-in-from-right-12 fade-in duration-300">
@@ -351,6 +421,126 @@ export default function SettingsDialog() {
                 Usuń konto
               </Button>
             </DialogFooter>
+          </div>
+        )}
+
+        {/* --------------- EDYCJA DANYCH --------------- */}
+        {view === "edit-data" && (
+          <div className="animate-in slide-in-from-right-12 fade-in duration-300">
+            <DialogHeader className="flex flex-row items-center ml-[-15px]">
+              <Button variant="ghost" onClick={() => setView("main")}>
+                <ChevronLeft className="size-5" />
+              </Button>
+              <DialogTitle>Edycja danych</DialogTitle>
+            </DialogHeader>
+
+            <Form {...editForm}>
+              <form
+                onSubmit={editForm.handleSubmit((values) => {
+                  startEditTransition(async () => {
+                    const res = await updatePersonalDataAction(values)
+                    if (res?.error) {
+                      toast.error(res.error)
+                      return
+                    }
+
+                    toast.success("Zapisano dane!")
+                    editForm.reset(getEditDefaultValues())
+                    setView("main")
+                  })
+                })}
+              >
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <FormField
+                    control={editForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Imię</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="given-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="surname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nazwisko</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="family-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
+                  <FormField
+                    control={editForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numer telefonu</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="tel" inputMode="tel" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+              {baseData.role === "trainee" && (
+                  <FormField
+                    control={editForm.control}
+                    name={"birthdate" as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data urodzenia</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="appearance-none"
+                            type="date"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}  
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="min-w-[100px]"
+                    onClick={() => setView("main")}
+                    disabled={isEditPending}
+                  >
+                    Anuluj
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    className="min-w-[100px]"
+                    disabled={isEditPending || !editForm.formState.isValid}
+                  >
+                    {isEditPending ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Zapisz"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
           </div>
         )}
 

@@ -15,7 +15,7 @@ export async function changePasswordAction(input: unknown) {
 
   const validated = changePasswordSchema.safeParse(input)
   if (!validated.success)
-    return { error: "Nieprawidłowe dane wejściowe." as const }
+    return { error: "Nieprawidłowe dane wejściowe." }
 
   const { currentPassword, newPassword, logoutOtherDevices } = validated.data
   const currentRefreshToken = (session as { refreshToken?: string | null }).refreshToken ?? null
@@ -26,10 +26,10 @@ export async function changePasswordAction(input: unknown) {
   })
 
   if (!user?.password)
-    return { error: "Nie można zmienić hasła dla tego konta." as const }
+    return { error: "Nie można zmienić hasła dla tego konta." }
 
   const ok = await argon2.verify(user.password, currentPassword)
-  if (!ok) return { error: "Obecne hasło jest nieprawidłowe" as const }
+  if (!ok) return { error: "Obecne hasło jest nieprawidłowe" }
 
   const hashed = await argon2.hash(newPassword)
 
@@ -50,7 +50,7 @@ export async function changePasswordAction(input: unknown) {
       })
     }
   } catch {
-    return { error: "Nie udało się zmienić hasła. Spróbuj ponownie." as const }
+    return { error: "Wystąpił błąd podczas zmiany hasła. Spróbuj ponownie." }
   }
 
   return { success: true as const }

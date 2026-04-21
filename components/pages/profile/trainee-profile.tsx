@@ -2,9 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"
-import { formatDate } from "@/lib/utils"
 import { ClipboardList } from "lucide-react";
-import EditTraineeDataDialog from "@/components/dialogs/trainee/edit-data"
 import SettingsDialog from "@/components/dialogs/settings"
 
 interface TraineeProfileProps {
@@ -14,6 +12,7 @@ interface TraineeProfileProps {
     surname: string;
     email: string;
     phone: string;
+    role: string;
   };
   specificData: {
     birthdate: Date;
@@ -22,63 +21,35 @@ interface TraineeProfileProps {
 
 export default function TraineeProfile({ baseData, specificData }: TraineeProfileProps) {
   return (
-    <section className="grid grid-cols-1 gap-15 lg:gap-10 lg:grid-cols-5">
+    <section className="grid grid-cols-1 gap-10 lg:grid-cols-5">
 
       {/* PROFIL*/}
-      <div className="lg:col-span-3">
-      <Card className="h-full">
-      <CardContent className="px-0 md:grid md:grid-cols-[1fr_1px_1fr]">
+      <div className="lg:col-span-2">
+      <Card>
+      <CardContent>
     
-    {/* Imię i nazwisko */}
-    <div className="md:row-start-1 px-5 min-w-0">
-      <div className="text-xl font-michroma text-baby-blue text-center w-full">
+    <div className="flex flex-col items-center text-center">
+       <div className="text-xl font-michroma text-baby-blue  w-full">
         <p className="truncate">{baseData.name}</p>
         <p className="truncate">{baseData.surname}</p>
-      </div>
-    </div>
+        </div>
 
-    {/* DANE */}
-    <div className="md:row-span-2 flex flex-col justify-center text-center px-8 gap-7 mt-8 md:mt-0 min-w-0">
-      
-      {/* Email */}
-      <div>
-        <p className="text-zinc-400 text-sm">e-mail</p>
-        <p className="truncate"> {baseData.email} </p>
-      </div>
-
-      {/* Telefon */}
-      <div>
-        <p className="text-zinc-400 text-sm">telefon</p>
-        <p> {baseData.phone} </p>
-      </div>
-
-      {/* Data urodzenia */}
-      <div>
-        <p className="text-zinc-400 text-sm">data urodzenia</p>
-        <p>{formatDate(specificData.birthdate)}</p>
-      </div>
-
-    </div>
-
-    {/* Buttony */}
-    <div className="flex flex-col items-center px-5 mt-8">
-      <div className="w-full max-w-[250px] flex flex-col gap-4">
+        <p className="truncate text-zinc-400 mt-4"> {baseData.email} </p>
+        
+        <div className="w-full max-w-[250px] flex flex-col gap-4 mt-6">
+         {/*TO-DO: dodac funkcjonalnosc ankiety startowej */}
         <Button variant="secondary"> <ClipboardList/> Ankieta startowa</Button>
-        <SettingsDialog />
-        <EditTraineeDataDialog baseData={baseData} specificData={specificData} />
+        <SettingsDialog baseData={baseData} specificData={specificData} />
       </div>
     </div>
-
-
-    <div className="hidden md:block md:row-start-1 md:row-span-2 w-[1px] h-60 bg-gold" />
-
+     
   </CardContent>
 </Card>
       </div>
 
       {/*TO-DO: Podpiac logike do pobierania rekordow z bazy, tworzenie nowych rekordow i edycja */}
       {/* REKORDY OSOBISTE */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-3">
         <Card className="h-full">
           <CardContent>
             <p className="text-xl text-baby-blue font-michroma mb-8">Rekordy osobiste</p>
