@@ -32,11 +32,8 @@ export default function RootLayout({
       <body
         className={`${mina.className} ${michroma.variable} overflow-x-hidden antialiased`}
       >
-        
         <AuthProvider>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <TooltipProvider>{children}</TooltipProvider>
         </AuthProvider>
         <Toaster richColors position="top-right" />
       </body>

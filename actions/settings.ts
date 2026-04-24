@@ -14,11 +14,11 @@ export async function changePasswordAction(input: unknown) {
   }
 
   const validated = changePasswordSchema.safeParse(input)
-  if (!validated.success)
-    return { error: "Nieprawidłowe dane wejściowe." }
+  if (!validated.success) return { error: "Nieprawidłowe dane wejściowe." }
 
   const { currentPassword, newPassword, logoutOtherDevices } = validated.data
-  const currentRefreshToken = (session as { refreshToken?: string | null }).refreshToken ?? null
+  const currentRefreshToken =
+    (session as { refreshToken?: string | null }).refreshToken ?? null
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },

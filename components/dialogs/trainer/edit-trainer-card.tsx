@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
 
-import { updateTrainerCardAction } from "@/actions/profile";
-import { Button } from "@/components/ui/button";
+import { updateTrainerCardAction } from "@/actions/profile"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -23,22 +23,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { trainerCardSchema, type TrainerCardValues } from "@/lib/validations";
-import { Loader2 } from "lucide-react";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { trainerCardSchema, type TrainerCardValues } from "@/lib/validations"
+import { Loader2 } from "lucide-react"
 
 interface EditTrainerCardDialogProps {
-  pricePerTraining: number | null;
-  workDescription: string | null;
+  pricePerTraining: number | null
+  workDescription: string | null
 }
 
 export default function EditTrainerCardDialog({
   pricePerTraining,
   workDescription,
 }: EditTrainerCardDialogProps) {
-  const [open, setOpen] = React.useState(false);
-  const [isSaving, startSavingTransition] = React.useTransition();
+  const [open, setOpen] = React.useState(false)
+  const [isSaving, startSavingTransition] = React.useTransition()
   const form = useForm<TrainerCardValues>({
     resolver: zodResolver(trainerCardSchema),
     defaultValues: {
@@ -46,33 +46,34 @@ export default function EditTrainerCardDialog({
       work_description: workDescription ?? "",
     },
     mode: "onChange",
-  });
+  })
 
   React.useEffect(() => {
     if (!open) {
       form.reset({
         price_per_training: pricePerTraining ?? null,
         work_description: workDescription ?? "",
-      });
+      })
     }
-  }, [open, pricePerTraining, workDescription, form]);
+  }, [open, pricePerTraining, workDescription, form])
 
   const handleSave = (data: TrainerCardValues) => {
     startSavingTransition(async () => {
       const result = await updateTrainerCardAction({
         price_per_training: data.price_per_training ?? null,
-        work_description: data.work_description === "" ? null : data.work_description ?? null,
-      });
+        work_description:
+          data.work_description === "" ? null : (data.work_description ?? null),
+      })
 
       if (result?.error) {
-        toast.error(result.error);
-        return;
+        toast.error(result.error)
+        return
       }
 
-      toast.success("Zaktualizowano wizytówkę");
-      setOpen(false);
-    });
-  };
+      toast.success("Zaktualizowano wizytówkę")
+      setOpen(false)
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,11 +102,17 @@ export default function EditTrainerCardDialog({
                     <FormLabel>Cena za trening (PLN)</FormLabel>
                     <FormControl>
                       <Input
-                        value={field.value === null || field.value === undefined ? "" : field.value.toString()}
+                        value={
+                          field.value === null || field.value === undefined
+                            ? ""
+                            : field.value.toString()
+                        }
                         type="number"
                         onChange={(event) => {
-                          const rawValue = event.target.value.trim();
-                          field.onChange(rawValue === "" ? null : Number(rawValue));
+                          const rawValue = event.target.value.trim()
+                          field.onChange(
+                            rawValue === "" ? null : Number(rawValue)
+                          )
                         }}
                         placeholder="Np. 150"
                         inputMode="numeric"
@@ -127,7 +134,7 @@ export default function EditTrainerCardDialog({
                         value={field.value ?? ""}
                         onChange={field.onChange}
                         placeholder="Opisz swój styl pracy, doświadczenie, specjalizację i podejście."
-                        className="custom-scrollbar flex min-h-[150px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-baby-blue"
+                        className="custom-scrollbar border-input focus-visible:ring-baby-blue flex min-h-[150px] w-full rounded-md border bg-transparent px-3 py-2 text-sm focus-visible:ring-1 focus-visible:outline-none"
                       />
                     </FormControl>
                     <FormMessage />
@@ -137,7 +144,12 @@ export default function EditTrainerCardDialog({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="destructive" onClick={() => setOpen(false)} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setOpen(false)}
+                disabled={isSaving}
+              >
                 Anuluj
               </Button>
               <Button type="submit" disabled={isSaving}>
@@ -148,5 +160,5 @@ export default function EditTrainerCardDialog({
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

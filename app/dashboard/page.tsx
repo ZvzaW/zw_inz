@@ -247,9 +247,7 @@ export default function DashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-zinc-400">
-                    Brak powiadomień.
-                  </p>
+                  <p className="text-center text-zinc-400">Brak powiadomień.</p>
                 )}
 
                 {hasMore && !error && (

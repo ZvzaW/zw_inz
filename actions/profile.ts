@@ -14,7 +14,6 @@ import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
-
 export async function updatePersonalDataAction(input: unknown) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -22,8 +21,9 @@ export async function updatePersonalDataAction(input: unknown) {
   }
 
   const role = session.user.role
-  const schema = role === "trainer" ? trainerPersonalDataSchema : traineePersonalDataSchema
-  
+  const schema =
+    role === "trainer" ? trainerPersonalDataSchema : traineePersonalDataSchema
+
   const validated = schema.safeParse(input)
   if (!validated.success) return { error: "Nieprawidłowe dane wejściowe." }
 
@@ -40,10 +40,9 @@ export async function updatePersonalDataAction(input: unknown) {
         },
       })
 
-
       if (role === "trainee") {
-        const traineeData = data as TraineePersonalDataValues;
-        
+        const traineeData = data as TraineePersonalDataValues
+
         await tx.trainee.update({
           where: { id: session.user.id },
           data: { birthdate: new Date(traineeData.birthdate) },
@@ -52,16 +51,15 @@ export async function updatePersonalDataAction(input: unknown) {
     })
   } catch (e: any) {
     return {
-      error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie."
+      error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie.",
     }
   }
 
   revalidatePath("/dashboard/profile")
-  return { success: true}
+  return { success: true }
 }
 
-
-//--- TRAINER --- 
+//--- TRAINER ---
 export async function updateTrainerCardAction(input: unknown) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -78,28 +76,33 @@ export async function updateTrainerCardAction(input: unknown) {
   }
 
   const data = validated.data
-  const preparedDescription = data.work_description === undefined ? undefined : data.work_description === null || data.work_description.trim() === "" ? 
-        null : data.work_description.trim()
+  const preparedDescription =
+    data.work_description === undefined
+      ? undefined
+      : data.work_description === null || data.work_description.trim() === ""
+        ? null
+        : data.work_description.trim()
 
   try {
     await prisma.trainer.update({
       where: { id: session.user.id },
       data: {
         price_per_training:
-          data.price_per_training === undefined ? undefined : data.price_per_training,
+          data.price_per_training === undefined
+            ? undefined
+            : data.price_per_training,
         work_description: preparedDescription,
       },
     })
   } catch (e: any) {
     return {
-      error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie."
+      error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie.",
     }
   }
 
   revalidatePath("/dashboard/profile")
   return { success: true }
 }
-
 
 export async function editWorkplaceAction(input: unknown) {
   const session = await auth()
@@ -121,9 +124,9 @@ export async function editWorkplaceAction(input: unknown) {
 
   try {
     const result = await prisma.workplace.updateMany({
-      where: { 
+      where: {
         id: data.id,
-        trainer_id: session.user.id
+        trainer_id: session.user.id,
       },
       data: {
         name: data.name,
@@ -135,13 +138,15 @@ export async function editWorkplaceAction(input: unknown) {
     })
 
     if (result.count === 0) {
-      return { error: "Nie znaleziono miejsca pracy lub brak uprawnień."}
+      return { error: "Nie znaleziono miejsca pracy lub brak uprawnień." }
     }
 
     revalidatePath("/dashboard/profile")
     return { success: true }
   } catch (error) {
-    return { error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie." }
+    return {
+      error: "Wystąpił błąd podczas aktualizacji danych. Spróbuj ponownie.",
+    }
   }
 }
 
@@ -177,10 +182,11 @@ export async function addWorkplaceAction(input: unknown) {
     revalidatePath("/dashboard/profile")
     return { success: true }
   } catch (error) {
-    return { error: "Wystąpił błąd podczas zapisywania danych. Spróbuj ponownie." }
+    return {
+      error: "Wystąpił błąd podczas zapisywania danych. Spróbuj ponownie.",
+    }
   }
 }
-
 
 export async function deleteWorkplaceAction(workplaceId: string) {
   const session = await auth()
@@ -195,18 +201,21 @@ export async function deleteWorkplaceAction(workplaceId: string) {
 
   try {
     const workplacesCount = await prisma.workplace.count({
-      where: { trainer_id: session.user.id }
+      where: { trainer_id: session.user.id },
     })
 
     if (workplacesCount <= 1) {
-      return { error: "Nie możesz usunąć tego miejsca pracy. Profil trenera musi posiadać co najmniej jedno miejsce." }
+      return {
+        error:
+          "Nie możesz usunąć tego miejsca pracy. Profil trenera musi posiadać co najmniej jedno miejsce.",
+      }
     }
 
     const result = await prisma.workplace.deleteMany({
       where: {
         id: workplaceId,
-        trainer_id: session.user.id 
-      }
+        trainer_id: session.user.id,
+      },
     })
 
     if (result.count === 0) {
@@ -240,6 +249,8 @@ export async function changeProfileVisibilityAction(isPublic: boolean) {
     revalidatePath("/dashboard/profile")
     return { success: true }
   } catch (error) {
-    return { error: "Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie." }
+    return {
+      error: "Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.",
+    }
   }
 }

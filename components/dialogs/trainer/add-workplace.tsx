@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus } from "lucide-react";
-import { toast } from "sonner";
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2, Plus } from "lucide-react"
+import { toast } from "sonner"
 
-import { addWorkplaceAction } from "@/actions/profile";
-import { Button } from "@/components/ui/button";
+import { addWorkplaceAction } from "@/actions/profile"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -24,13 +24,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { createWorkplaceSchema, type CreateWorkplaceFormValues } from "@/lib/validations";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  createWorkplaceSchema,
+  type CreateWorkplaceFormValues,
+} from "@/lib/validations"
 
 export default function AddWorkplaceDialog() {
-  const [open, setOpen] = React.useState(false);
-  const [isSaving, startSavingTransition] = React.useTransition();
+  const [open, setOpen] = React.useState(false)
+  const [isSaving, startSavingTransition] = React.useTransition()
   const form = useForm<CreateWorkplaceFormValues>({
     resolver: zodResolver(createWorkplaceSchema),
     defaultValues: {
@@ -41,27 +44,27 @@ export default function AddWorkplaceDialog() {
       city: "",
     },
     mode: "onChange",
-  });
+  })
 
   React.useEffect(() => {
     if (!open) {
-      form.reset();
+      form.reset()
     }
-  }, [open, form]);
+  }, [open, form])
 
   const handleSave = (data: CreateWorkplaceFormValues) => {
     startSavingTransition(async () => {
-      const result = await addWorkplaceAction(data);
+      const result = await addWorkplaceAction(data)
 
       if (result?.error) {
-        toast.error(result.error);
-        return;
+        toast.error(result.error)
+        return
       }
 
-      toast.success("Dodano nowe miejsce pracy.");
-      setOpen(false);
-    });
-  };
+      toast.success("Dodano nowe miejsce pracy.")
+      setOpen(false)
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -110,7 +113,7 @@ export default function AddWorkplaceDialog() {
                 )}
               />
 
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <FormField
                   control={form.control}
                   name="building_number"
@@ -156,7 +159,12 @@ export default function AddWorkplaceDialog() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="destructive" onClick={() => setOpen(false)} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setOpen(false)}
+                disabled={isSaving}
+              >
                 Anuluj
               </Button>
               <Button type="submit" disabled={isSaving}>
@@ -167,5 +175,5 @@ export default function AddWorkplaceDialog() {
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

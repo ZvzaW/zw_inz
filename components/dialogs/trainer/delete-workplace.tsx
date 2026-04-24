@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Loader2, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import * as React from "react"
+import { Loader2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
-import { deleteWorkplaceAction } from "@/actions/profile";
-import { Button } from "@/components/ui/button";
+import { deleteWorkplaceAction } from "@/actions/profile"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,33 +13,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 interface DeleteWorkplaceDialogProps {
-  workplaceId: string;
-  workplaceName: string;
+  workplaceId: string
+  workplaceName: string
 }
 
 export default function DeleteWorkplaceDialog({
   workplaceId,
   workplaceName,
 }: DeleteWorkplaceDialogProps) {
-  const [open, setOpen] = React.useState(false);
-  const [isDeleting, startDeletingTransition] = React.useTransition();
+  const [open, setOpen] = React.useState(false)
+  const [isDeleting, startDeletingTransition] = React.useTransition()
 
   const handleDelete = () => {
     startDeletingTransition(async () => {
-      const result = await deleteWorkplaceAction(workplaceId);
+      const result = await deleteWorkplaceAction(workplaceId)
 
       if (result?.error) {
-        toast.error(result.error);
-        return;
+        toast.error(result.error)
+        return
       }
 
-      toast.success("Miejsce pracy zostało usunięte.");
-      setOpen(false);
-    });
-  };
+      toast.success("Miejsce pracy zostało usunięte.")
+      setOpen(false)
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -53,16 +53,28 @@ export default function DeleteWorkplaceDialog({
         <DialogHeader>
           <DialogTitle>Usuń miejsce pracy</DialogTitle>
         </DialogHeader>
-        <p className="text-zinc-400 text-center"> Czy na pewno chcesz usunąć miejsce <span className="font-semibold">{workplaceName}</span>? Tej operacji nie można cofnąć.</p>
+        <p className="text-center text-zinc-400">
+          Czy na pewno chcesz usunąć miejsce{" "}
+          <span className="font-semibold">{workplaceName}</span>? Tej operacji
+          nie można cofnąć.
+        </p>
         <DialogFooter>
-          <Button variant="destructive" onClick={() => setOpen(false)} disabled={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={() => setOpen(false)}
+            disabled={isDeleting}
+          >
             Anuluj
           </Button>
-          <Button className="bg-gold hover:bg-gold/60" onClick={handleDelete} disabled={isDeleting}>
+          <Button
+            className="bg-gold hover:bg-gold/60"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
             {isDeleting ? <Loader2 className="animate-spin" /> : "Usuń"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

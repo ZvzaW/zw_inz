@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Loader2, Pencil } from "lucide-react";
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
+import { Loader2, Pencil } from "lucide-react"
 
-import { editWorkplaceAction } from "@/actions/profile";
-import { Button } from "@/components/ui/button";
+import { editWorkplaceAction } from "@/actions/profile"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -24,24 +24,29 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { editWorkplaceSchema, type EditWorkplaceFormValues } from "@/lib/validations";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  editWorkplaceSchema,
+  type EditWorkplaceFormValues,
+} from "@/lib/validations"
 
 interface EditWorkplaceDialogProps {
   workplace: {
-    id: string;
-    name: string;
-    street: string;
-    building_number: string;
-    flat_number: string | null;
-    city: string;
-  };
+    id: string
+    name: string
+    street: string
+    building_number: string
+    flat_number: string | null
+    city: string
+  }
 }
 
-export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogProps) {
-  const [open, setOpen] = React.useState(false);
-  const [isSaving, startSavingTransition] = React.useTransition();
+export default function EditWorkplaceDialog({
+  workplace,
+}: EditWorkplaceDialogProps) {
+  const [open, setOpen] = React.useState(false)
+  const [isSaving, startSavingTransition] = React.useTransition()
   const form = useForm<EditWorkplaceFormValues>({
     resolver: zodResolver(editWorkplaceSchema),
     defaultValues: {
@@ -53,7 +58,7 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
       city: workplace.city,
     },
     mode: "onChange",
-  });
+  })
 
   React.useEffect(() => {
     if (!open) {
@@ -64,23 +69,23 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
         building_number: workplace.building_number,
         flat_number: workplace.flat_number ?? "",
         city: workplace.city,
-      });
+      })
     }
-  }, [open, workplace, form]);
+  }, [open, workplace, form])
 
   const handleSave = (data: EditWorkplaceFormValues) => {
     startSavingTransition(async () => {
-      const result = await editWorkplaceAction(data);
+      const result = await editWorkplaceAction(data)
 
       if (result?.error) {
-        toast.error(result.error);
-        return;
+        toast.error(result.error)
+        return
       }
 
-      toast.success("Zapisano zmiany miejsca pracy.");
-      setOpen(false);
-    });
-  };
+      toast.success("Zapisano zmiany miejsca pracy.")
+      setOpen(false)
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -129,7 +134,7 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
                 )}
               />
 
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <FormField
                   control={form.control}
                   name="building_number"
@@ -143,7 +148,9 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
                     </FormItem>
                   )}
                 />
+
                 <span className="mt-6 px-2">/</span>
+                
                 <FormField
                   control={form.control}
                   name="flat_number"
@@ -175,7 +182,12 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="destructive" onClick={() => setOpen(false)} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setOpen(false)}
+                disabled={isSaving}
+              >
                 Anuluj
               </Button>
               <Button type="submit" disabled={isSaving}>
@@ -186,5 +198,5 @@ export default function EditWorkplaceDialog({ workplace }: EditWorkplaceDialogPr
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

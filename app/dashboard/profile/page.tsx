@@ -6,7 +6,7 @@ import TraineeProfile from "@/components/pages/profile/trainee-profile"
 
 export default async function ProfilePage() {
   const session = await auth()
-  
+
   if (!session?.user?.id) {
     redirect("/?unauthorized=true")
   }
@@ -14,13 +14,13 @@ export default async function ProfilePage() {
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      trainee: true, 
+      trainee: true,
       trainer: {
         include: {
-          workplace: true, 
-        }
+          workplace: true,
+        },
       },
-    }
+    },
   })
 
   if (!user) {
@@ -37,13 +37,15 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="w-full p-3 flex flex-col justify-center min-h-[calc(100vh-15rem)]">
+    <div className="flex min-h-[calc(100vh-15rem)] w-full flex-col justify-center p-3">
       {user.role === "trainer" && user.trainer ? (
         <TrainerProfile baseData={baseUserData} specificData={user.trainer} />
       ) : user.role === "trainee" && user.trainee ? (
         <TraineeProfile baseData={baseUserData} specificData={user.trainee} />
       ) : (
-        <p className="text-zinc-400">Brak szczegółowych danych profilu dla tej roli.</p>
+        <p className="text-zinc-400">
+          Brak szczegółowych danych profilu dla tej roli.
+        </p>
       )}
     </div>
   )

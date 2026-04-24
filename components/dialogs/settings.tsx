@@ -4,7 +4,15 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Settings, LogOut, Key, ShieldAlert, ChevronLeft, Loader2, Pencil } from "lucide-react"
+import {
+  Settings,
+  LogOut,
+  Key,
+  ShieldAlert,
+  ChevronLeft,
+  Loader2,
+  Pencil,
+} from "lucide-react"
 import { toDateInputValue } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -48,19 +56,22 @@ export interface SettingsDialogProps {
     surname: string
     email: string
     phone: string
-    role: string 
+    role: string
   }
   specificData: {
-    birthdate?: Date 
-    work_description?: string | null 
-    price_per_training?: number | null 
-    is_public?: boolean 
+    birthdate?: Date
+    work_description?: string | null
+    price_per_training?: number | null
+    is_public?: boolean
   }
 }
 
 type ViewState = "main" | "logout" | "password" | "delete" | "edit-data"
 
-export default function SettingsDialog({ baseData, specificData }: SettingsDialogProps) {
+export default function SettingsDialog({
+  baseData,
+  specificData,
+}: SettingsDialogProps) {
   const [open, setOpen] = React.useState(false)
   const [view, setView] = React.useState<ViewState>("main")
   const [deleteInput, setDeleteInput] = React.useState("")
@@ -68,7 +79,9 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
   const [isPasswordPending, startPasswordTransition] = React.useTransition()
   const [isEditPending, startEditTransition] = React.useTransition()
   const isTrainer = baseData.role === "trainer"
-  const formSchema = isTrainer ? trainerPersonalDataSchema : traineePersonalDataSchema
+  const formSchema = isTrainer
+    ? trainerPersonalDataSchema
+    : traineePersonalDataSchema
 
   const passwordForm = useForm<ChangePasswordValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -92,14 +105,11 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
     }
   }, [view, passwordForm])
 
-
   React.useEffect(() => {
     if (view !== "delete") {
-     setDeleteInput("")
+      setDeleteInput("")
     }
   }, [view])
-
-
 
   const getEditDefaultValues = () => {
     const base = {
@@ -111,12 +121,12 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
     if (!isTrainer) {
       return {
         ...base,
-        birthdate: specificData?.birthdate 
+        birthdate: specificData?.birthdate
           ? toDateInputValue(new Date(specificData.birthdate))
           : "",
       }
     }
-    
+
     return base
   }
 
@@ -132,14 +142,13 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
     }
   }, [view, editForm, baseData, specificData])
 
-
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
     if (!isOpen) {
       setTimeout(() => {
         setView("main")
         setDeleteInput("")
-      }, 200) 
+      }, 200)
     }
   }
 
@@ -147,11 +156,10 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="secondary">
-          <Settings/> Ustawienia
+          <Settings /> Ustawienia
         </Button>
       </DialogTrigger>
       <DialogContent>
-        
         {/* --------------- MENU GŁÓWNE --------------- */}
         {view === "main" && (
           <div className="animate-in slide-in-from-left-8 fade-in duration-300">
@@ -160,49 +168,46 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
             </DialogHeader>
 
             <div className="flex flex-col gap-5">
-            
               <Button
                 variant="secondary"
-                className="justify-start h-12 text-md border-2 border-baby-blue"
+                className="text-md border-baby-blue h-12 justify-start border-2"
                 onClick={() => setView("logout")}
               >
-                <LogOut className="ml-1 mr-1" />
+                <LogOut className="mr-1 ml-1" />
                 Wyloguj ze wszystkich urządzeń
               </Button>
 
               <Button
                 variant="secondary"
-                className="justify-start h-12 text-md border-2 border-baby-blue"
+                className="text-md border-baby-blue h-12 justify-start border-2"
                 onClick={() => setView("edit-data")}
               >
-                <Pencil className="ml-1 mr-1" />
+                <Pencil className="mr-1 ml-1" />
                 Edytuj dane
               </Button>
 
               <Button
                 variant="secondary"
-                className="justify-start h-12 text-md border-2 border-baby-blue"
+                className="text-md border-baby-blue h-12 justify-start border-2"
                 onClick={() => setView("password")}
               >
-                <Key className="ml-1 mr-1" />
+                <Key className="mr-1 ml-1" />
                 Zmień hasło
               </Button>
 
               <Button
                 variant="secondary"
-                className="justify-start h-12 text-md border-2 border-destructive hover:bg-destructive/20"
+                className="text-md border-destructive hover:bg-destructive/20 h-12 justify-start border-2"
                 onClick={() => setView("delete")}
               >
-                <ShieldAlert className="ml-1 mr-1" />
+                <ShieldAlert className="mr-1 ml-1" />
                 Usuń konto
               </Button>
             </div>
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="destructive">
-                  Zamknij
-                </Button>
+                <Button variant="destructive">Zamknij</Button>
               </DialogClose>
             </DialogFooter>
           </div>
@@ -211,30 +216,37 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
         {/* --------------- WYLOGUJ Z URZĄDZEŃ --------------- */}
         {view === "logout" && (
           <div className="animate-in slide-in-from-right-12 fade-in duration-300">
-            <DialogHeader className="flex flex-row items-center  ml-[-15px]">
+            <DialogHeader className="ml-[-15px] flex flex-row items-center">
               <Button variant="ghost" onClick={() => setView("main")}>
                 <ChevronLeft className="size-5" />
               </Button>
               <DialogTitle>Wyloguj urządzenia</DialogTitle>
-              
             </DialogHeader>
-            <DialogDescription> Spowoduje to zakończenie wszystkich Twoich aktywnych sesji na innych przeglądarkach i urządzeniach. Będziesz musiał zalogować się ponownie.
+            <DialogDescription>
+              {" "}
+              Spowoduje to zakończenie wszystkich Twoich aktywnych sesji na
+              innych przeglądarkach i urządzeniach. Będziesz musiał zalogować
+              się ponownie.
             </DialogDescription>
 
-          
             <DialogFooter>
               <Button
-              disabled={isPending}
-              onClick={() => {
-                startTransition(async () => {
-                  const res = await logoutAllDevicesAction()
-                  if (res?.error) {
-                     toast.error(res.error)
-                  }
-                })
-              }}>
-                {isPending ? <Loader2 className="animate-spin" /> : "Wyloguj wszędzie"}
-                </Button>
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(async () => {
+                    const res = await logoutAllDevicesAction()
+                    if (res?.error) {
+                      toast.error(res.error)
+                    }
+                  })
+                }}
+              >
+                {isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Wyloguj wszędzie"
+                )}
+              </Button>
             </DialogFooter>
           </div>
         )}
@@ -242,7 +254,7 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
         {/* --------------- ZMIEŃ HASŁO --------------- */}
         {view === "password" && (
           <div className="animate-in slide-in-from-right-12 fade-in duration-300">
-             <DialogHeader className="flex flex-row items-center  ml-[-15px]">
+            <DialogHeader className="ml-[-15px] flex flex-row items-center">
               <Button variant="ghost" onClick={() => setView("main")}>
                 <ChevronLeft className="size-5" />
               </Button>
@@ -274,7 +286,11 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                 })}
               >
                 <div className="flex flex-col gap-5">
-                  <p className="text-xs text-zinc-400"> Hasło ma się składać z minimum 8 znaków: małe i wielkie litery, cyfry</p>
+                  <p className="text-xs text-zinc-400">
+                    {" "}
+                    Hasło ma się składać z minimum 8 znaków: małe i wielkie
+                    litery, cyfry
+                  </p>
 
                   <FormField
                     control={passwordForm.control}
@@ -287,9 +303,9 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                             autoComplete="current-password"
                             {...field}
                             onChange={(e) => {
-                                field.onChange(e)
-                                passwordForm.trigger("newPassword")
-                              }}
+                              field.onChange(e)
+                              passwordForm.trigger("newPassword")
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -308,13 +324,13 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                             autoComplete="new-password"
                             {...field}
                             onChange={(e) => {
-                                field.onChange(e)
-                                passwordForm.trigger("confirmNewPassword") 
-                                passwordForm.trigger("currentPassword")
-                              }}
+                              field.onChange(e)
+                              passwordForm.trigger("confirmNewPassword")
+                              passwordForm.trigger("currentPassword")
+                            }}
                           />
                         </FormControl>
-                        <FormMessage /> 
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -331,7 +347,7 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                             {...field}
                           />
                         </FormControl>
-                        
+
                         <FormMessage />
                       </FormItem>
                     )}
@@ -341,23 +357,24 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                     control={passwordForm.control}
                     name="logoutOtherDevices"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row ml-1 gap-2">
+                      <FormItem className="ml-1 flex flex-row gap-2">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
-                            onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
                           />
                         </FormControl>
-                          <FormLabel className="text-sm text-zinc-300">
-                            Wyloguj mnie z innych urządzeń po zmianie hasła 
-                          </FormLabel>
+                        <FormLabel className="text-sm text-zinc-300">
+                          Wyloguj mnie z innych urządzeń po zmianie hasła
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
-                </div> 
-                
+                </div>
 
-                <DialogFooter> 
+                <DialogFooter>
                   <Button
                     type="button"
                     variant="destructive"
@@ -374,8 +391,9 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                   >
                     {isPasswordPending ? (
                       <Loader2 className="animate-spin" />
-                    ) : "Zapisz"}
-                    
+                    ) : (
+                      "Zapisz"
+                    )}
                   </Button>
                 </DialogFooter>
               </form>
@@ -387,35 +405,45 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
         {/* --------------- USUŃ KONTO --------------- */}
         {view === "delete" && (
           <div className="animate-in slide-in-from-right-12 fade-in duration-300">
-            <DialogHeader className="flex flex-row items-center  ml-[-15px]">
+            <DialogHeader className="ml-[-15px] flex flex-row items-center">
               <Button variant="ghost" onClick={() => setView("main")}>
                 <ChevronLeft className="size-5" />
               </Button>
-              <DialogTitle className="text-destructive">Usuwanie konta</DialogTitle>
+              <DialogTitle className="text-destructive">
+                Usuwanie konta
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-5">
-              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md">
-                <p className="text-sm font-bold text-destructive">TEJ AKCJI NIE MOŻNA COFNĄĆ!</p>
-                <p className="text-sm text-zinc-400 mt-1">Wszystkie dane, historia treningów i inne utworzone przez Ciebie rzeczy zostaną bezpowrotnie usunięte z naszej bazy danych!</p>
+              <div className="bg-destructive/10 border-destructive/30 rounded-md border p-3">
+                <p className="text-destructive text-sm font-bold">
+                  TEJ AKCJI NIE MOŻNA COFNĄĆ!
+                </p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Wszystkie dane, historia treningów i inne utworzone przez
+                  Ciebie rzeczy zostaną bezpowrotnie usunięte z naszej bazy
+                  danych!
+                </p>
               </div>
 
-              
               <div>
                 <label className="text-sm text-zinc-300">
-                  Aby potwierdzić, wpisz słowo <span className="font-bold text-white">delete</span>
+                  Aby potwierdzić, wpisz słowo{" "}
+                  <span className="font-bold text-white">delete</span>
                 </label>
-                <Input 
+                <Input
                   value={deleteInput}
                   onChange={(e) => setDeleteInput(e.target.value)}
                   placeholder="delete"
-                  className="mt-1 border-destructive/50 focus-visible:ring-destructive/50"
+                  className="border-destructive/50 focus-visible:ring-destructive/50 mt-1"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="destructive" onClick={() => setView("main")}>Anuluj</Button>
-              <Button 
-                className="bg-gold hover:bg-gold/60 "
+              <Button variant="destructive" onClick={() => setView("main")}>
+                Anuluj
+              </Button>
+              <Button
+                className="bg-gold hover:bg-gold/60"
                 disabled={deleteInput !== "delete"}
               >
                 Usuń konto
@@ -427,7 +455,7 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
         {/* --------------- EDYCJA DANYCH --------------- */}
         {view === "edit-data" && (
           <div className="animate-in slide-in-from-right-12 fade-in duration-300">
-            <DialogHeader className="flex flex-row items-center ml-[-15px]">
+            <DialogHeader className="ml-[-15px] flex flex-row items-center">
               <Button variant="ghost" onClick={() => setView("main")}>
                 <ChevronLeft className="size-5" />
               </Button>
@@ -480,7 +508,7 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                   />
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
+                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <FormField
                     control={editForm.control}
                     name="phone"
@@ -488,24 +516,9 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                       <FormItem>
                         <FormLabel>Numer telefonu</FormLabel>
                         <FormControl>
-                          <Input autoComplete="tel" inputMode="tel" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-              {baseData.role === "trainee" && (
-                  <FormField
-                    control={editForm.control}
-                    name={"birthdate" as any}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data urodzenia</FormLabel>
-                        <FormControl>
                           <Input
-                            className="appearance-none"
-                            type="date"
+                            autoComplete="tel"
+                            inputMode="tel"
                             {...field}
                           />
                         </FormControl>
@@ -513,7 +526,26 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
                       </FormItem>
                     )}
                   />
-                )}  
+
+                  {baseData.role === "trainee" && (
+                    <FormField
+                      control={editForm.control}
+                      name={"birthdate" as any}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data urodzenia</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="appearance-none"
+                              type="date"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 <DialogFooter>
@@ -543,7 +575,6 @@ export default function SettingsDialog({ baseData, specificData }: SettingsDialo
             </Form>
           </div>
         )}
-
       </DialogContent>
     </Dialog>
   )

@@ -7,9 +7,9 @@ import { redirect } from "next/navigation"
 
 export async function getNotificationsAction(page: number = 0) {
   const session = await auth()
-  if (!session?.user?.id){
-      redirect("/?unauthorized=true")
-    }
+  if (!session?.user?.id) {
+    redirect("/?unauthorized=true")
+  }
 
   try {
     const limit = 15
@@ -38,7 +38,7 @@ export async function getNotificationsAction(page: number = 0) {
 
 export async function getUnreadCountAction() {
   const session = await auth()
-  if (!session?.user?.id){
+  if (!session?.user?.id) {
     redirect("/?unauthorized=true")
   }
 
@@ -61,7 +61,7 @@ export async function getUnreadCountAction() {
 
 export async function markAsReadAction(id: string) {
   const session = await auth()
-  if (!session?.user?.id){
+  if (!session?.user?.id) {
     redirect("/?unauthorized=true")
   }
 
@@ -113,4 +113,3 @@ function groupNotificationsByDate(notifications: any[]) {
 
   return groups
 }
-

@@ -13,14 +13,15 @@ export async function registerAction(
   formData: any,
   role: "trainee" | "trainer"
 ) {
-  const schema = role === "trainer" ? registerTrainerSchema : registerTraineeSchema;
-  const validatedFields = schema.safeParse(formData);
+  const schema =
+    role === "trainer" ? registerTrainerSchema : registerTraineeSchema
+  const validatedFields = schema.safeParse(formData)
 
   if (!validatedFields.success)
-    return { error: "Nieprawidłowe dane wejściowe." };
+    return { error: "Nieprawidłowe dane wejściowe." }
 
-  const data = validatedFields.data;
-  const hashedPassword = await argon2.hash(data.password);
+  const data = validatedFields.data
+  const hashedPassword = await argon2.hash(data.password)
 
   try {
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -33,12 +34,11 @@ export async function registerAction(
           password: hashedPassword,
           role: role,
         },
-      });
-
+      })
 
       if (role === "trainer") {
-        const d = data as any;
-        await tx.trainer.create({ data: { id: newUser.id } });
+        const d = data as any
+        await tx.trainer.create({ data: { id: newUser.id } })
         await tx.workplace.create({
           data: {
             trainer_id: newUser.id,
@@ -48,18 +48,18 @@ export async function registerAction(
             flat_number: d.flatNumber.trim() || null,
             city: d.city.trim(),
           },
-        });
+        })
       } else {
-        const d = data as any;
+        const d = data as any
         await tx.trainee.create({
           data: { id: newUser.id, birthdate: new Date(d.birthdate) },
-        });
+        })
       }
 
       const notificationMessage =
         role === "trainer"
           ? "Przejdź do swojego profilu i uzupełnij wizytówkę, aby przyszli podopieczni mogli poznać Twoją ofertę."
-          : "Przejdź do swojego profilu i uzupełnij ankietę startową niezbędną do współpracy z Twoim przyszłym trenerem.";
+          : "Przejdź do swojego profilu i uzupełnij ankietę startową niezbędną do współpracy z Twoim przyszłym trenerem."
 
       await tx.notification.create({
         data: {
@@ -69,16 +69,15 @@ export async function registerAction(
           redirect_url: "dashboard/profile",
           type: "system",
         },
-      });
-    });
+      })
+    })
   } catch (error: any) {
-    if (error.code === "P2002") return { error: "Ten e-mail jest już zajęty!" };
-    return { error: "Wystąpił błąd podczas rejestracji, spróbuj ponownie." };
+    if (error.code === "P2002") return { error: "Ten e-mail jest już zajęty!" }
+    return { error: "Wystąpił błąd podczas rejestracji, spróbuj ponownie." }
   }
 
-  redirect("/?registered=true");
+  redirect("/?registered=true")
 }
-
 
 export async function loginAction(data: any) {
   const email = data.email
@@ -128,7 +127,6 @@ export async function logoutAction() {
   await signOut({ redirectTo: "/" })
 }
 
-
 export async function logoutAllDevicesAction() {
   const session = await auth()
   if (!session?.user?.id) {
@@ -137,12 +135,15 @@ export async function logoutAllDevicesAction() {
 
   try {
     await prisma.refresh_token.deleteMany({
-      where: { 
-        user_id: session.user.id 
+      where: {
+        user_id: session.user.id,
       },
     })
   } catch (error) {
-    return { error: "Wystąpił błąd podczas wylogowywania ze wszystkich urządzeń. Spróbuj ponownie." }
+    return {
+      error:
+        "Wystąpił błąd podczas wylogowywania ze wszystkich urządzeń. Spróbuj ponownie.",
+    }
   }
 
   await signOut({ redirectTo: "/" })
