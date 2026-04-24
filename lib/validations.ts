@@ -26,8 +26,8 @@ export const passwordSchema = z
     message: "Hasło musi zawierać małe i wielkie litery oraz cyfry",
   });
 
-const baseName = z.string().trim().min(1, "Imię jest wymagane");
-const baseSurname = z.string().trim().min(1, "Nazwisko jest wymagane");
+const baseName = z.string().trim().min(1, "Imię jest wymagane").regex(/^[\p{L} \-]+$/u, "Imię może zawierać tylko litery");
+const baseSurname = z.string().trim().min(1, "Nazwisko jest wymagane").regex(/^[\p{L} \-]+$/u, "Nazwisko może zawierać tylko litery");
 const baseEmail = z.string().trim().min(1, "Adres e-mail jest wymagany").pipe(z.email("Podaj poprawny adres e-mail"));
 const basePhone = z.string().trim().min(1, "Numer telefonu jest wymagany").regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu");
 const baseBirthdate = z.string().min(1, "Data urodzenia jest wymagana").refine((val) => isAtLeast15(val), { message: "Musisz mieć co najmniej 15 lat" });

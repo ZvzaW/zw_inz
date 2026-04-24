@@ -219,3 +219,27 @@ export async function deleteWorkplaceAction(workplaceId: string) {
     return { error: "Wystąpił błąd podczas usuwania danych. Spróbuj ponownie." }
   }
 }
+
+export async function changeProfileVisibilityAction(isPublic: boolean) {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    redirect("/?unauthorized=true")
+  }
+
+  if (session.user.role !== "trainer") {
+    return { error: "Brak uprawnień do tej operacji." }
+  }
+
+  try {
+    await prisma.trainer.update({
+      where: { id: session.user.id },
+      data: { is_public: isPublic },
+    })
+
+    revalidatePath("/dashboard/profile")
+    return { success: true }
+  } catch (error) {
+    return { error: "Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie." }
+  }
+}

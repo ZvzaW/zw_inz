@@ -1,5 +1,7 @@
 "use client"
 
+import * as React from "react";
+import { changeProfileVisibilityAction } from "@/actions/profile";
 import EditTrainerCardDialog from "@/components/dialogs/trainer/edit-trainer-card";
 import EditWorkplaceDialog from "@/components/dialogs/trainer/edit-workplace";
 import DeleteWorkplaceDialog from "@/components/dialogs/trainer/delete-workplace";
@@ -10,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger, PopoverDescription } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { InfoIcon, Star } from "lucide-react";
+import { toast } from "sonner";
 
 interface TrainerProfileProps {
   baseData: {
@@ -36,6 +39,26 @@ interface TrainerProfileProps {
 }
 
 export default function TrainerProfile({ baseData, specificData }: TrainerProfileProps) {
+  const [isPublic, setIsPublic] = React.useState(specificData.is_public);
+  const [isSaving, startSavingTransition] = React.useTransition();
+
+  const handleProfileVisibilityChange = (checked: boolean) => {
+    const previousValue = isPublic;
+    setIsPublic(checked);
+
+    startSavingTransition(async () => {
+      const result = await changeProfileVisibilityAction(checked);
+
+      if (result?.error) {
+        setIsPublic(previousValue);
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(`Profil jest teraz ${checked ? "publiczny" : "prywatny"}.`);
+    });
+  };
+
   return (
     <section className="grid grid-cols-1 gap-10 lg:grid-cols-6">
       <div className="lg:col-span-4">
@@ -91,15 +114,21 @@ export default function TrainerProfile({ baseData, specificData }: TrainerProfil
           <PopoverDescription>
     Profil publiczny pozwala na widoczność Twojego profilu w wyszukiwarce trenerów. Umożliwia to nawiązanie z Tobą współpracy.
     <br />
-    Aktualnie twój profil jest <span className="font-bold">{specificData.is_public ? "publiczny" : "prywatny"}</span>.
+    Aktualnie twój profil jest <span className="font-bold">{isPublic ? "publiczny" : "prywatny"}</span>.
   </PopoverDescription> 
   </PopoverContent>
         </Popover>
         <p className="text-zinc-300 text-sm mr-5">Profil publiczny</p>
         
-        <Switch title={specificData.is_public ? "publiczny" : "prywatny"} checked={specificData.is_public} onCheckedChange={() => {}} />
+        <Switch
+          title={isPublic ? "publiczny" : "prywatny"}
+          checked={isPublic}
+          onCheckedChange={handleProfileVisibilityChange}
+          disabled={isSaving}
+        />
         </div>
         
+        {/*TO-DO: Zaimplementowac moduł opinii*/}
         <Button variant="secondary"> <Star/> Opinie klientów</Button>
         <SettingsDialog baseData={baseData} specificData={specificData} />
       </div>
