@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
-import { loginAction } from "@/actions/auth"
+import { loginAction } from "@/actions/authorization"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)

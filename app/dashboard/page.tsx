@@ -17,26 +17,34 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import TrainerStats from "@/components/pages/trainer-stats"
-import TraineeStats from "@/components/pages/trainee-stats"
+import TrainerStats from "@/components/pages/statistics/trainer-stats"
+import TraineeStats from "@/components/pages/statistics/trainee-stats"
 import {
   getNotificationsAction,
   getUnreadCountAction,
   markAsReadAction,
 } from "@/actions/notifications"
-import { Notification } from "@/lib/types"
 import { useRouter } from "next/navigation"
+
+interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  redirect_url: string | null
+  type: "request" | "comment" | "message" | "system"
+  is_read: boolean
+  created_at: Date
+}
 
 const countFetcher = async () => {
   const res = await getUnreadCountAction()
-  if (res.error === "401") window.location.href = "/?unauthorized=true"
   if (res.error) throw new Error(res.error)
   return res.count || 0
 }
 
 const notificationFetcher = async (page: number) => {
   const res = await getNotificationsAction(page)
-  if (res.error === "401") window.location.href = "/?unauthorized=true"
   if (res.error) throw new Error(res.error)
   return res
 }
@@ -119,6 +127,7 @@ export default function DashboardPage() {
     isLoadingInitialData ||
     (size > 0 && pagesData && typeof pagesData[size - 1] === "undefined")
   const hasMore = pagesData?.[pagesData.length - 1]?.hasMore ?? true
+  const hasNotifications = Object.keys(notificationsGrouped).length > 0
 
   const handleNotificationClick = async (
     notifId: string,
@@ -194,48 +203,52 @@ export default function DashboardPage() {
               <Loader2 className="text-baby-blue mx-auto mt-10 animate-spin" />
             ) : (
               <>
-                {Object.entries(notificationsGrouped).map(([label, items]) => (
-                  <div key={label} className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <Separator className="flex-1" />
-                      <span className="text-gold text-xs font-medium uppercase">
-                        {label}
-                      </span>
-                      <Separator className="flex-1" />
-                    </div>
-                    <div className="space-y-3">
-                      {items.map((notif: Notification) => (
-                        <button
-                          key={notif.id}
-                          onClick={() =>
-                            handleNotificationClick(
-                              notif.id,
-                              notif.is_read,
-                              notif.redirect_url
-                            )
-                          }
-                          className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left transition-all ${
-                            !notif.is_read ? "border-baby-blue border-2" : ""
-                          }`}
-                        >
-                          <div className="space-y-3 text-sm">
-                            <div
-                              className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
-                            >
-                              {notif.title} {getNotificationIcon(notif.type)}
+                {hasNotifications ? (
+                  Object.entries(notificationsGrouped).map(([label, items]) => (
+                    <div key={label} className="space-y-6">
+                      <div className="flex items-center gap-4">
+                        <Separator className="flex-1" />
+                        <span className="text-gold text-xs font-medium uppercase">
+                          {label}
+                        </span>
+                        <Separator className="flex-1" />
+                      </div>
+                      <div className="space-y-3">
+                        {items.map((notif: Notification) => (
+                          <button
+                            key={notif.id}
+                            onClick={() =>
+                              handleNotificationClick(
+                                notif.id,
+                                notif.is_read,
+                                notif.redirect_url
+                              )
+                            }
+                            className={`bg-dirty-blue hover:bg-hover group flex w-full items-center justify-between rounded-xl p-4 text-left transition-all ${
+                              !notif.is_read ? "border-baby-blue border-2" : ""
+                            }`}
+                          >
+                            <div className="space-y-3 text-sm">
+                              <div
+                                className={`flex gap-2 font-semibold ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                              >
+                                {notif.title} {getNotificationIcon(notif.type)}
+                              </div>
+                              <p className="leading-relaxed text-zinc-400">
+                                {notif.message}
+                              </p>
                             </div>
-                            <p className="leading-relaxed text-zinc-400">
-                              {notif.message}
-                            </p>
-                          </div>
-                          <ChevronRight
-                            className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
-                          />
-                        </button>
-                      ))}
+                            <ChevronRight
+                              className={`shrink-0 ${!notif.is_read ? "text-baby-blue" : "text-zinc-300"}`}
+                            />
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-zinc-400">Brak powiadomień.</p>
+                )}
 
                 {hasMore && !error && (
                   <div className="flex justify-center pb-4">
@@ -283,7 +296,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center">
+    <div className="flex min-h-[calc(100vh-20rem)] w-full flex-col justify-center p-3">
       <div className="block lg:hidden">
         <Tabs
           value={mobileTab}

@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { traineeSchema, trainerSchema } from "@/lib/validations"
+import { registerTraineeSchema, registerTrainerSchema } from "@/lib/validations"
 import { Prisma } from "@prisma/client"
 import * as argon2 from "argon2"
 import { redirect } from "next/navigation"
@@ -13,7 +13,8 @@ export async function registerAction(
   formData: any,
   role: "trainee" | "trainer"
 ) {
-  const schema = role === "trainer" ? trainerSchema : traineeSchema
+  const schema =
+    role === "trainer" ? registerTrainerSchema : registerTraineeSchema
   const validatedFields = schema.safeParse(formData)
 
   if (!validatedFields.success)
@@ -54,9 +55,23 @@ export async function registerAction(
           data: { id: newUser.id, birthdate: new Date(d.birthdate) },
         })
       }
+
+      const notificationMessage =
+        role === "trainer"
+          ? "Przejdź do swojego profilu i uzupełnij wizytówkę, aby przyszli podopieczni mogli poznać Twoją ofertę."
+          : "Przejdź do swojego profilu i uzupełnij ankietę startową niezbędną do współpracy z Twoim przyszłym trenerem."
+
+      await tx.notification.create({
+        data: {
+          user_id: newUser.id,
+          title: "Witaj w systemie UpMentor!",
+          message: notificationMessage,
+          redirect_url: "dashboard/profile",
+          type: "system",
+        },
+      })
     })
   } catch (error: any) {
-    console.log("LOG BŁĘDU PRISMA:", error.code, error.meta)
     if (error.code === "P2002") return { error: "Ten e-mail jest już zajęty!" }
     return { error: "Wystąpił błąd podczas rejestracji, spróbuj ponownie." }
   }
@@ -86,7 +101,7 @@ export async function loginAction(data: any) {
         case "CredentialsSignin":
           return { error: "Błędny e-mail lub hasło!" }
         default:
-          return { error: "Wystąpił błąd logowania. Spróbuj ponownie." }
+          return { error: "Wystąpił błąd podczas logowania. Spróbuj ponownie." }
       }
     }
 
@@ -101,12 +116,34 @@ export async function logoutAction() {
   console.log(tokenToDelete)
   try {
     if (tokenToDelete) {
-      await prisma.refresh_token.delete({
+      await prisma.refresh_token.deleteMany({
         where: { token: tokenToDelete },
       })
     }
   } catch (error) {
-    return { error: "Nie udało się wylogować. Spróbuj ponownie." }
+    return { error: "Wystąpił błąd podczas wylogowywania. Spróbuj ponownie." }
+  }
+
+  await signOut({ redirectTo: "/" })
+}
+
+export async function logoutAllDevicesAction() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/?unauthorized=true")
+  }
+
+  try {
+    await prisma.refresh_token.deleteMany({
+      where: {
+        user_id: session.user.id,
+      },
+    })
+  } catch (error) {
+    return {
+      error:
+        "Wystąpił błąd podczas wylogowywania ze wszystkich urządzeń. Spróbuj ponownie.",
+    }
   }
 
   await signOut({ redirectTo: "/" })

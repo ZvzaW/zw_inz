@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-import { logoutAction } from "@/actions/auth"
+import { logoutAction } from "@/actions/authorization"
 import { toast } from "sonner"
 
 export default function Navbar() {

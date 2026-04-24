@@ -1,5 +1,21 @@
 import { z } from "zod"
 
+const isAtLeast15 = (dateString: string) => {
+  const birth = new Date(dateString)
+  if (isNaN(birth.getTime())) return false
+
+  const today = new Date()
+  const fifteenYearsAgo = new Date(
+    today.getFullYear() - 15,
+    today.getMonth(),
+    today.getDate()
+  )
+
+  return birth <= fifteenYearsAgo
+}
+
+// --- BASE SCHEMAS ---
+
 export const passwordSchema = z
   .string()
   .min(8, "Hasło musi mieć co najmniej 8 znaków")
@@ -8,74 +24,145 @@ export const passwordSchema = z
     message: "Hasło musi zawierać małe i wielkie litery oraz cyfry",
   })
 
-const isAtLeast13 = (dateString: string) => {
-  const birth = new Date(dateString)
-  if (isNaN(birth.getTime())) return false
+const baseName = z
+  .string()
+  .trim()
+  .min(1, "Imię jest wymagane")
+  .regex(/^[\p{L} \-]+$/u, "Imię może zawierać tylko litery")
+const baseSurname = z
+  .string()
+  .trim()
+  .min(1, "Nazwisko jest wymagane")
+  .regex(/^[\p{L} \-]+$/u, "Nazwisko może zawierać tylko litery")
+const baseEmail = z
+  .string()
+  .trim()
+  .min(1, "Adres e-mail jest wymagany")
+  .pipe(z.email("Podaj poprawny adres e-mail"))
+const basePhone = z
+  .string()
+  .trim()
+  .min(1, "Numer telefonu jest wymagany")
+  .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu")
+const baseBirthdate = z
+  .string()
+  .min(1, "Data urodzenia jest wymagana")
+  .refine((val) => isAtLeast15(val), {
+    message: "Musisz mieć co najmniej 15 lat",
+  })
+const baseTerms = z
+  .boolean()
+  .refine((val) => val === true, { message: "Musisz wyrazić zgodę" })
 
-  const today = new Date()
-  const thirteenYearsAgo = new Date(
-    today.getFullYear() - 13,
-    today.getMonth(),
-    today.getDate()
-  )
+const baseWorkplaceName = z
+  .string()
+  .trim()
+  .min(1, "Nazwa miejsca jest wymagana")
+const baseStreet = z.string().trim().min(1, "Ulica jest wymagana")
+const baseBuildingNumber = z
+  .string()
+  .trim()
+  .min(1, "Numer budynku jest wymagany")
+const baseFlatNumber = z
+  .string()
+  .trim()
+  .max(10, "Numer mieszkania jest zbyt długi")
+  .optional()
+  .or(z.literal(""))
+const baseCity = z.string().trim().min(1, "Miasto jest wymagane")
 
-  return birth <= thirteenYearsAgo
-}
+// --- MAIN SCHEMAS ---
 
-export const traineeSchema = z.object({
-  name: z.string().trim().min(1, "Imię jest wymagane"),
-  surname: z.string().trim().min(1, "Nazwisko jest wymagane"),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Adres e-mail jest wymagany")
-    .email("Podaj poprawny adres e-mail"),
-  phone: z
-    .string()
-    .trim()
-    .min(1, "Numer telefonu jest wymagany")
-    .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu"),
-  birthdate: z
-    .string()
-    .min(1, "Data urodzenia jest wymagana")
-    .refine((val) => isAtLeast13(val), {
-      message: "Musisz mieć co najmniej 13 lat",
-    }),
+// TRAINEE
+export const registerTraineeSchema = z.object({
+  name: baseName,
+  surname: baseSurname,
+  email: baseEmail,
+  phone: basePhone,
+  birthdate: baseBirthdate,
   password: passwordSchema,
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Musisz wyrazić zgodę",
-  }),
+  terms: baseTerms,
 })
+export type RegisterTraineeFormValues = z.infer<typeof registerTraineeSchema>
 
-export type TraineeFormValues = z.infer<typeof traineeSchema>
+export const traineePersonalDataSchema = z.object({
+  name: baseName,
+  surname: baseSurname,
+  phone: basePhone,
+  birthdate: baseBirthdate,
+})
+export type TraineePersonalDataValues = z.infer<
+  typeof traineePersonalDataSchema
+>
 
-export const trainerSchema = z.object({
-  name: z.string().trim().min(1, "Imię jest wymagane"),
-  surname: z.string().trim().min(1, "Nazwisko jest wymagane"),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Adres e-mail jest wymagany")
-    .email("Podaj poprawny adres e-mail"),
-  phone: z
-    .string()
-    .trim()
-    .min(1, "Numer telefonu jest wymagany")
-    .regex(/^[0-9\s+()-]{9,30}$/, "Podaj poprawny numer telefonu"),
+// TRAINER
+export const registerTrainerSchema = z.object({
+  name: baseName,
+  surname: baseSurname,
+  email: baseEmail,
+  phone: basePhone,
   password: passwordSchema,
-  workplaceName: z.string().trim().min(1, "Nazwa miejsca jest wymagana"),
-  street: z.string().trim().min(1, "Ulica jest wymagana"),
-  buildingNumber: z.string().trim().min(1, "Numer budynku jest wymagany"),
-  flatNumber: z
-    .string()
-    .trim()
-    .max(10, "Numer mieszkania jest zbyt długi")
-    .optional()
-    .or(z.literal("")),
-  city: z.string().trim().min(1, "Miasto jest wymagane"),
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Musisz wyrazić zgodę",
-  }),
+  workplaceName: baseWorkplaceName,
+  street: baseStreet,
+  buildingNumber: baseBuildingNumber,
+  flatNumber: baseFlatNumber,
+  city: baseCity,
+  terms: baseTerms,
 })
+export type RegisterTrainerFormValues = z.infer<typeof registerTrainerSchema>
 
-export type TrainerFormValues = z.infer<typeof trainerSchema>
+export const trainerPersonalDataSchema = z.object({
+  name: baseName,
+  surname: baseSurname,
+  phone: basePhone,
+})
+export type TrainerPersonalDataValues = z.infer<
+  typeof trainerPersonalDataSchema
+>
+
+export const trainerCardSchema = z.object({
+  price_per_training: z
+    .union([z.number().int().min(0, "Cena nie może być ujemna"), z.null()])
+    .optional(),
+  work_description: z.string().trim().nullable().optional(),
+})
+export type TrainerCardValues = z.infer<typeof trainerCardSchema>
+
+// WORKPLACE
+export const editWorkplaceSchema = z.object({
+  id: z.string(),
+  name: baseWorkplaceName,
+  street: baseStreet,
+  building_number: baseBuildingNumber,
+  flat_number: baseFlatNumber,
+  city: baseCity,
+})
+export type EditWorkplaceFormValues = z.infer<typeof editWorkplaceSchema>
+
+export const createWorkplaceSchema = z.object({
+  name: baseWorkplaceName,
+  street: baseStreet,
+  building_number: baseBuildingNumber,
+  flat_number: baseFlatNumber,
+  city: baseCity,
+})
+export type CreateWorkplaceFormValues = z.infer<typeof createWorkplaceSchema>
+
+// --- MORE SCHEMAS ---
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Podaj obecne hasło"),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string().min(1, "Potwierdź nowe hasło"),
+    logoutOtherDevices: z.boolean(),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Hasła nie są identyczne",
+    path: ["confirmNewPassword"],
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "Nowe hasło musi być inne od obecnego",
+    path: ["newPassword"],
+  })
+export type ChangePasswordValues = z.input<typeof changePasswordSchema>

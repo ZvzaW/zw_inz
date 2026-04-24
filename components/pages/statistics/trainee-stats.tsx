@@ -10,7 +10,7 @@ import {
   LabelList,
   Rectangle,
 } from "recharts"
-import { Separator } from "../ui/separator"
+import { Separator } from "@/components/ui/separator"
 
 // MOCK DATA
 const weeklyHoursData = [
